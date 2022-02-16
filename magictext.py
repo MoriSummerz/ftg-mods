@@ -11,12 +11,6 @@ from asyncio import sleep
 import io
 from telethon.utils import get_display_name
 
-
-class MoriException(Exception):
-    def __init__(self):
-        pass
-
-
 logger = logging.getLogger(__name__)
 letters = {
     " ": """✨✨✨✨✨✨✨✨✨✨✨
@@ -348,6 +342,7 @@ letters = {
 class PicsaverMod(loader.Module):
     """"Magic Text generator"""
     strings = {"name": "MagicText"}
+    
 
     async def client_ready(self, client, db) -> None:
         self.db = db
@@ -358,10 +353,6 @@ class PicsaverMod(loader.Module):
         text = utils.get_args_raw(message)
         await message.edit(letters[' '])
         for letter in text:
-            try:
-                await message.edit(letters[letter.lower()])
-            except Exception:
-            	await message.edit("Not supported symbol: " + letter)
-                raise MoriException('Not supported symbol')
+            await message.edit(letters.get(letter.lower(), '<b>🚫 Not supported symbol</b>'))
             await sleep(0.9)
         await message.edit("✨💖<b>" + text + "</b>💖✨")
