@@ -342,7 +342,6 @@ letters = {
 class PicsaverMod(loader.Module):
     """"Magic Text generator"""
     strings = {"name": "MagicText"}
-    
 
     async def client_ready(self, client, db) -> None:
         self.db = db
@@ -352,7 +351,12 @@ class PicsaverMod(loader.Module):
         """Send message with animating text"""
         text = utils.get_args_raw(message)
         await message.edit(letters[' '])
+        _last = ""
         for letter in text:
+            if _last and _last == letter:
+                await sleep(.7)
+                continue
             await message.edit(letters.get(letter.lower(), '<b>🚫 Not supported symbol</b>'))
-            await sleep(0.7)
+            _last = letter
+            await sleep(.7)
         await message.edit("✨💖<b>" + text + "</b>💖✨")
