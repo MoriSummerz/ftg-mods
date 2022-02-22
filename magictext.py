@@ -356,10 +356,10 @@ class PicsaverMod(loader.Module):
             if _last and _last == letter:
                 await sleep(.7)
                 continue
-            if _last not in letters:
+            if letter not in letters and _last not in letters:
                 await sleep(.7)
-            else:
-                await message.edit(letters.get(letter.lower(), '<b>🚫 Not supported symbol</b>'))
+                continue
+            await message.edit(letters.get(letter.lower(), '<b>🚫 Not supported symbol</b>'))
             _last = letter
             await sleep(.7)
         await message.edit("✨💖<b>" + text + "</b>💖✨")
