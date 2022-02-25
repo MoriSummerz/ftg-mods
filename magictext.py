@@ -794,7 +794,7 @@ class MagicTextMod(loader.Module):
         """Send message with animating text"""
         text = utils.get_args_raw(message)
         text = text.replace("<3", "💖")
-        await message.edit(letters[' '])
+        await message.edit(letters[' '].replace("0", self.symbols[0]))
         _last = ""
         for letter in text:
             if _last and _last == letter:
@@ -808,4 +808,5 @@ class MagicTextMod(loader.Module):
             _last = letter
             await sleep(.7)
         text = text.replace("💖", "<3")
-        await message.edit("✨💖<b>" + text + "</b>💖✨")
+        await message.edit(self.symbols[0] + self.symbols[1] + "<b>" + text + "</b>"
+                           + self.symbols[1] + self.symbols[0])
