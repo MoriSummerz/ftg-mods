@@ -795,4 +795,5 @@ class PicsaverMod(loader.Module):
             await message.edit(letters.get(letter.lower(), '<b>🚫 Not supported symbol</b>'))
             _last = letter
             await sleep(.7)
+        text = text.replace("💖", "<3")
         await message.edit("✨💖<b>" + text + "</b>💖✨")
