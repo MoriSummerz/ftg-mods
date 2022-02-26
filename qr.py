@@ -28,6 +28,8 @@ class QRMod(loader.Module):
         """Generate QR code"""
         reply = await message.get_reply_message()
         text = reply.raw_text if reply else utils.get_args_raw(message)
+        if not text:
+            await message.edit('❌ Please type text or reply to text')
         await message.delete()
         qr = pyqrcode.create(text)
         buffer = io.BytesIO()
