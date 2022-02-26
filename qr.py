@@ -31,7 +31,7 @@ class QRMod(loader.Module):
         if not text:
             await message.edit('❌ Please type text or reply to text')
         await message.delete()
-        qr = pyqrcode.create(text)
+        qr = pyqrcode.create(text.encode('utf-8'), encoding='utf-8')
         buffer = io.BytesIO()
         qr.png(buffer, scale=10)
         buffer.name = "image.png"
