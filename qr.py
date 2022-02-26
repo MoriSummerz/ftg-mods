@@ -28,6 +28,5 @@ class QRMod(loader.Module):
         """Generate QR code"""
         text = utils.get_args_raw(message)
         qr = pyqrcode.create(text)
-        buffer = io.BytesIO()
-        qr.png(buffer)
-        await self.client.send_file(message.peer_id, buffer, caption='')
+        qr.png('qrcode.png', scale=15)
+        await self.client.send_file(message.peer_id, open('qrcode.png', 'rb'), caption='Generated QR code')
