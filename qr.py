@@ -26,7 +26,8 @@ class QRMod(loader.Module):
 
     async def qrcmd(self, message: Message) -> None:
         """Generate QR code"""
-        text = message.reply.text if message.reply else utils.get_args_raw(message)
+        reply = await message.get_reply_message()
+        text = reply.raw_text if reply else utils.get_args_raw(message)
         await message.delete()
         qr = pyqrcode.create(text)
         buffer = io.BytesIO()
