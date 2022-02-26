@@ -1,0 +1,4 @@
+osu
+magictext
+qr
+top20
