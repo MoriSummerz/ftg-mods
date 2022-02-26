@@ -89,6 +89,7 @@ class OsuMod(loader.Module):
             return
         if args:
             nickname = args
+        await message.delete()
         req = requests.get('https://osu.ppy.sh/users/' + nickname).text
         s = req.find('data-initial-data="') + 19
         JSON = req[s:req.find('"', s + 1)].replace('&quot;', '"')
