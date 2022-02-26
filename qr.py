@@ -27,10 +27,10 @@ class QRMod(loader.Module):
     async def qrcmd(self, message: Message) -> None:
         """Generate QR code"""
         text = message.reply.text if message.reply else utils.get_args_raw(message)
+        await message.delete()
         qr = pyqrcode.create(text)
         buffer = io.BytesIO()
         qr.png(buffer, scale=10)
         buffer.name = "image.png"
         await self.client.send_file(message.peer_id, buffer.getvalue(), caption='Generated QR code',
                                     reply_to=message.reply_to_msg_id)
-        await message.delete()
