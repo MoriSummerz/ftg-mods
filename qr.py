@@ -4,8 +4,10 @@
     Copyright 2022 t.me/morisummerzxc
     Licensed under the Apache License, Version 2.0
 """
-# requires: qrcode[pil]
-import qrcode
+# requires: pyqrcode pypng
+import pyqrcode
+import qrtools
+import io
 from .. import loader, utils
 from telethon.tl.types import *
 import logging
@@ -25,5 +27,7 @@ class QRMod(loader.Module):
     async def qrcmd(self, message: Message) -> None:
         """Generate QR code"""
         text = utils.get_args_raw(message)
-        img = qrcode.make(text)
-        await self.client.send_file(message.peer_id, img, caption='')
+        qr = pyqrcode.create(text)
+        buffer = io.BytesIO()
+        qr.png(buffer)
+        await self.client.send_file(message.peer_id, buffer, caption='')
