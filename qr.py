@@ -32,4 +32,5 @@ class QRMod(loader.Module):
         buffer = io.BytesIO()
         qr.png(buffer, scale=10)
         buffer.name = "image.png"
-        await self.client.send_file(message.peer_id, buffer.getvalue(), caption='Generated QR code')
+        await self.client.send_file(message.peer_id, buffer.getvalue(), caption='Generated QR code',
+                                    reply_to=message.reply_to_msg_id)
