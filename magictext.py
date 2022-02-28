@@ -782,7 +782,7 @@ class MagicTextMod(loader.Module):
         self.symbols = self.db.get(self.strings['name'], 'symbols', '✨💖')
 
     async def mtsetcmd(self, message: Message):
-        """Set the symbols for animation (Separated by space. Example: <code>.mtset ✨ 💖<code/>)"""
+        """Set the symbols for animation (Separated by space. Example: <code>.mtset ✨ 💖</code>)"""
         text = utils.get_args_raw(message).split()
         if len(text) != 2:
             await message.edit('<b>🚫 Please type only 2 symbols</b>')
