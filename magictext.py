@@ -4,12 +4,12 @@
     Copyright 2022 t.me/morisummerzxc
     Licensed under the Apache License, Version 2.0
 """
-from .. import loader, utils
-from telethon.tl.types import *
+from .. import loader, utils  # noqa
+from telethon.tl.types import Message  # noqa
 import logging
 from asyncio import sleep
 import io
-from telethon.utils import get_display_name
+from telethon.utils import get_display_name  # noqa
 from aiogram.types import CallbackQuery
 
 logger = logging.getLogger(__name__)
@@ -782,7 +782,7 @@ class MagicTextMod(loader.Module):
         self.symbols = self.db.get(self.strings['name'], 'symbols', '✨💖')
 
     async def mtsetcmd(self, message: Message):
-        """Set the symbols for animation (Separated by space. Example: <code>.mtset ✨ 💖</code>)"""
+        """Set the symbols for animation (Separated by space. Example: .mtset ✨ 💖)"""
         text = utils.get_args_raw(message).split()
         if len(text) != 2:
             await message.edit('<b>🚫 Please type only 2 symbols</b>')
@@ -812,32 +812,32 @@ class MagicTextMod(loader.Module):
         await message.edit(self.symbols[0] + self.symbols[1] + "<b>" + text + "</b>"
                            + self.symbols[1] + self.symbols[0])
 
-        async def mticmd(self, message: Message) -> None:
-            """Send inline message with animating text"""
-            text = utils.get_args_raw(message)
-            await self.inline.form("❤️‍🔥 I want to tell you something...", reply_markup=[[{
-                'text': '💖 Open',
-                'callback': self.inline,
-                'args': text,
-            }]], force_me=False, message=message, ttl=60 * 60)
+    async def mticmd(self, message: Message) -> None:
+        """Send inline message with animating text"""
+        text = utils.get_args_raw(message)
+        await self.inline.form("❤️‍🔥 I want to tell you something...", reply_markup=[[{
+            'text': '💖 Open',
+            'callback': self.inline__handler,
+            'args': (text,),
+        }]], force_me=False, message=message, ttl=60 * 60)
 
-        async def inline(self, call: CallbackQuery, args: str) -> None:
-            """Inline handler"""
-            args = args.replace("<3", "💖")
-            await call.edit(letters[' '].replace("0", self.symbols[0]))
-            _last = ""
-            for letter in args:
-                if _last and _last == letter:
-                    await sleep(.7)
-                    continue
-                if letter not in letters and _last not in letters:
-                    await sleep(.7)
-                    continue
-                await call.edit(letters.get(letter.lower(), '<b>🚫 Not supported symbol</b>').
-                                replace("0", self.symbols[0]).replace("1", self.symbols[1]))
-                _last = letter
+    async def inline__handler(self, call: CallbackQuery, args: str) -> None:
+        """Inline handler"""
+        args = args.replace("<3", "💖")
+        await call.edit(letters[' '].replace("0", self.symbols[0]))
+        _last = ""
+        for letter in args:
+            if _last and _last == letter:
                 await sleep(.7)
-            args = args.replace("💖", "<3")
-            await call.edit(self.symbols[0] + self.symbols[1] + "<b>" + text + "</b>"
-                            + self.symbols[1] + self.symbols[0])
-            await call.unload()
+                continue
+            if letter not in letters and _last not in letters:
+                await sleep(.7)
+                continue
+            await call.edit(letters.get(letter.lower(), '<b>🚫 Not supported symbol</b>').
+                            replace("0", self.symbols[0]).replace("1", self.symbols[1]))
+            _last = letter
+            await sleep(.7)
+        args = args.replace("💖", "<3")
+        await call.edit(self.symbols[0] + self.symbols[1] + "<b>" + args + "</b>"
+                        + self.symbols[1] + self.symbols[0])
+        await call.unload()
