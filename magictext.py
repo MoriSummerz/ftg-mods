@@ -791,7 +791,7 @@ class MagicTextMod(loader.Module):
         self.symbols = text
         await message.edit('<b>✅Symbols set successfully</b>')
 
-    async def mt(self, message: Message):
+    async def mtcmd(self, message: Message):
         """Send message with animating text"""
         text = utils.get_args_raw(message)
         text = text.replace("<3", "💖")
