@@ -10,6 +10,7 @@ import logging
 from asyncio import sleep
 import io
 from telethon.utils import get_display_name
+from aiogram.types import CallbackQuery
 
 logger = logging.getLogger(__name__)
 letters = {
@@ -780,8 +781,8 @@ class MagicTextMod(loader.Module):
         self.client = client
         self.symbols = self.db.get(self.strings['name'], 'symbols', '✨💖')
 
-    async def magicsetcmd(self, message: Message):
-        """Set the symbols for animation (Separated by space. Example: .magicset ✨ 💖)"""
+    async def mtsetcmd(self, message: Message):
+        """Set the symbols for animation (Separated by space. Example: .mtset ✨ 💖)"""
         text = utils.get_args_raw(message).split()
         if len(text) != 2:
             await message.edit('<b>🚫 Please type only 2 symbols</b>')
@@ -790,7 +791,7 @@ class MagicTextMod(loader.Module):
         self.symbols = text
         await message.edit('<b>✅Symbols set successfully</b>')
 
-    async def magictextcmd(self, message: Message):
+    async def mt(self, message: Message):
         """Send message with animating text"""
         text = utils.get_args_raw(message)
         text = text.replace("<3", "💖")
@@ -810,3 +811,33 @@ class MagicTextMod(loader.Module):
         text = text.replace("💖", "<3")
         await message.edit(self.symbols[0] + self.symbols[1] + "<b>" + text + "</b>"
                            + self.symbols[1] + self.symbols[0])
+
+        async def mticmd(self, message: Message) -> None:
+            """Send inline message with animating text"""
+            text = utils.get_args_raw(message)
+            await self.inline.form("❤️‍🔥 I want to tell you something...", reply_markup=[[{
+                'text': '💖 Open',
+                'callback': self.inline,
+                'args': text,
+            }]], force_me=False, message=message, ttl=60 * 60)
+
+        async def inline(self, call: CallbackQuery, args: str) -> None:
+            """Inline handler"""
+            args = args.replace("<3", "💖")
+            await call.edit(letters[' '].replace("0", self.symbols[0]))
+            _last = ""
+            for letter in args:
+                if _last and _last == letter:
+                    await sleep(.7)
+                    continue
+                if letter not in letters and _last not in letters:
+                    await sleep(.7)
+                    continue
+                await call.edit(letters.get(letter.lower(), '<b>🚫 Not supported symbol</b>').
+                                replace("0", self.symbols[0]).replace("1", self.symbols[1]))
+                _last = letter
+                await sleep(.7)
+            args = args.replace("💖", "<3")
+            await call.edit(self.symbols[0] + self.symbols[1] + "<b>" + text + "</b>"
+                            + self.symbols[1] + self.symbols[0])
+            await call.unload()
