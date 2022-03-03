@@ -74,13 +74,14 @@ letters = {
     "я": "000000000000\n000111111100\n001111111100\n001100001100\n001100001100\n001111111100\n000111111100\n000000111100\n000001111100\n000011101100\n000111001100\n000000000000",
     ".": "000000000000\n000000000000\n000000000000\n000000000000\n000000000000\n000000000000\n000000000000\n000000000000\n000000000000\n000001100000\n000001100000\n000000000000",
     "!": "000000000000\n000001100000\n000001100000\n000001100000\n000001100000\n000001100000\n000001100000\n000000000000\n000000000000\n000001100000\n000001100000\n000000000000",
-    "1": "000000000000\n001110011100\n011🤍11111110\n01🤍111111110\n011111111110\n011111111110\n011111111110\n001111111100\n000111111000\n000011110000\n000001100000\n000000000000"
+    "💖": "000000000000\n001110011100\n011🤍11111110\n01🤍111111110\n011111111110\n011111111110\n011111111110\n001111111100\n000111111000\n000011110000\n000001100000\n000000000000"
 }
 
 
 class MagicTextMod(loader.Module):
     """Magic Text generator"""
-    strings = {"name": "MagicText"}
+    strings = {"name": "MagicText",
+               "inline_message": "❤️‍🔥 I want to tell you something..."}
 
     async def client_ready(self, client, db) -> None:
         self.db = db
@@ -98,7 +99,7 @@ class MagicTextMod(loader.Module):
         self.db.set(self.strings['name'], 'symbols', text)
         self.symbols = text
 
-        await message.edit('<b>✅Symbols set successfully</b>')
+        await message.edit('<b>✅ Symbols set successfully</b>')
 
     async def mtcmd(self, message: Message):
         """Send message with animating text"""
@@ -131,7 +132,7 @@ class MagicTextMod(loader.Module):
         """Send inline message with animating text"""
         text = utils.get_args_raw(message)
 
-        await self.inline.form("❤️‍🔥 I want to tell you something...", reply_markup=[[{
+        await self.inline.form(self.strings['inline_message'], reply_markup=[[{
             'text': '💖 Open',
             'callback': self.inline__handler,
             'args': (text,),
