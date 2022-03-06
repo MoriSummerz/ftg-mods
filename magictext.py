@@ -81,12 +81,13 @@ letters = {
 class MagicTextMod(loader.Module):
     """Magic Text generator"""
     strings = {"name": "MagicText",
-               "inline_message": "❤️‍🔥 I want to tell you something..."}
+               "inline_text": "❤️‍🔥 I want to tell you something..."}
 
     async def client_ready(self, client, db) -> None:
         self.db = db
         self.client = client
         self.symbols = self.db.get(self.strings['name'], 'symbols', '✨💖')
+        self.inline_text = self.db.get(self.strings['name'], 'inline_text', self.strings['inline_text'])
 
     async def mtsetcmd(self, message: Message):
         """Set the symbols for animation (Separated by space. Example: .mtset ✨ 💖)"""
@@ -100,6 +101,19 @@ class MagicTextMod(loader.Module):
         self.symbols = text
 
         await message.edit('<b>✅ Symbols set successfully</b>')
+
+    async def mtisetcmd(self, message: Message):
+        """Set the text for inline message (Example: .mtiset ❤️‍🔥 I want to tell you something...)"""
+        text = utils.get_args_raw(message)
+
+        if not text:
+            await message.edit('<b>🚫 Please type text</b>')
+            return
+
+        self.db.set(self.strings['name'], 'inline_text', text)
+        self.inline_text = text
+
+        await message.edit('<b>✅ Text set successfully</b>')
 
     async def mtcmd(self, message: Message):
         """Send message with animating text"""
@@ -132,7 +146,7 @@ class MagicTextMod(loader.Module):
         """Send inline message with animating text"""
         text = utils.get_args_raw(message)
 
-        await self.inline.form(self.strings['inline_message'], reply_markup=[[{
+        await self.inline.form(self.inline_text, reply_markup=[[{
             'text': '💖 Open',
             'callback': self.inline__handler,
             'args': (text,),
