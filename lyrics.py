@@ -12,8 +12,10 @@ from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineQueryResult
 import logging
 from ..inline import GeekInlineQuery, rand  # noqa
 from bs4 import BeautifulSoup
-import requests
 from urllib.parse import quote_plus
+import requests
+from telethon.tl.types import *
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +57,20 @@ class LyricsMod(loader.Module):
     strings = {
         "name": "Lyrics"
     }
+
+    async def lyricscmd(self, message: Message):
+        """Get lyrics"""
+        text = utils.get_args_raw(message)
+        link = "https://www.musixmatch.com/search/"
+        page = requests.get(link + quote_plus(text) + '/tracks', headers=headers)
+        soup = BeautifulSoup(page.text, 'html.parser')
+        track = soup.find('li', class_='showArtist')
+        if not track:
+            await message.edit("Track not found")
+            return
+        link = "https://www.musixmatch.com" + track.find('a', class_='title')['href']
+        # pic = track.find('img')['srcset'].split()[-2]
+        await message.edit(get_lyrics(link))
 
     async def client_ready(self, client, db) -> None:
         self.db = db
