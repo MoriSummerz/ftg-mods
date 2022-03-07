@@ -41,11 +41,11 @@ def get_lyrics(link):
     soup = BeautifulSoup(page.text, 'html.parser')
     n = '\n'
     try:
-        res = f"<b>{soup.find('div', class_='lyrics-to').get_text()}</b>:\n"
+        res = f'<b><a href="{link}">{soup.find("div", class_="lyrics-to").get_text()}</a></b>:\n'
         res += f"<i>{''.join([p.get_text() + n for p in soup.find_all('p', class_='mxm-lyrics__content')])}</i>"
         return res
     except Exception:
-        return link
+        return f"Lyrics not available.{n + link}"
 
 
 def add_protocol(x):
@@ -53,14 +53,21 @@ def add_protocol(x):
 
 
 class LyricsMod(loader.Module):
-    """Songs lyrics"""
+    """Songs lyrics from Musixmatch"""
     strings = {
         "name": "Lyrics"
     }
 
+    async def client_ready(self, client, db) -> None:
+        self.db = db
+        self.client = client
+
     async def lyricscmd(self, message: Message):
         """Get lyrics"""
         text = utils.get_args_raw(message)
+        if not text:
+            message.edit('<b>🚫 Please type name of the song</b>')
+            return
         link = "https://www.musixmatch.com/search/"
         page = requests.get(link + quote_plus(text) + '/tracks', headers=headers)
         soup = BeautifulSoup(page.text, 'html.parser')
@@ -72,20 +79,11 @@ class LyricsMod(loader.Module):
         # pic = track.find('img')['srcset'].split()[-2]
         await message.edit(get_lyrics(link))
 
-    async def client_ready(self, client, db) -> None:
-        self.db = db
-        self.client = client
-
     async def lyrics_inline_handler(self, query: GeekInlineQuery) -> None:
-        """
-            Search song
-            @allow: all
-        """
+        """Search song"""
         text = query.args
-
         if not text:
             return
-
         endpoint = f"https://www.musixmatch.com/search/{quote_plus(text)}/tracks"
         page = requests.get(endpoint, headers=headers)
         soup = BeautifulSoup(page.text, 'html.parser')
@@ -99,5 +97,4 @@ class LyricsMod(loader.Module):
                 'thumb_url': add_protocol(track.find('img')['srcset'].split()[-2])
             }) if "has-picture" in str(track) else {}
         ) for track in soup.find_all('li', class_='showArtist')[:10]]
-
         await query.answer(res, cache_time=0)
