@@ -30,10 +30,11 @@ class Top20Mod(loader.Module):
                 await message.edit("Processed {} messages".format(total))
             if msg.text:
                 for word in msg.text.split():
-                    if word.lower() not in words:
-                        words[word.lower()] = 0
-                    else:
-                        words[word.lower()] += 1
+                    if len(word) >= 3:
+                        if word.lower() not in words:
+                            words[word.lower()] = 0
+                        else:
+                            words[word.lower()] += 1
         global freq
         freq = sorted(words, key=words.get, reverse=True)
         out = "".join(
