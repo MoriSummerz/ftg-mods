@@ -81,7 +81,7 @@ class LyricsMod(loader.Module):
         soup = BeautifulSoup(page.text, "html.parser")
         track = soup.find("li", class_="showArtist")
         if not track:
-            await message.edit("Track not found")
+            await message.edit("No results found")
             return
         link = "https://www.musixmatch.com" + track.find("a", class_="title")["href"]
         # pic = track.find('img')['srcset'].split()[-2]
