@@ -69,9 +69,13 @@ class LyricsMod(loader.Module):
     async def lyricscmd(self, message: Message):
         """Get lyrics"""
         text = utils.get_args_raw(message)
+        reply = await message.get_reply_message()
         if not text:
-            message.edit("<b>🚫 Please type name of the song</b>")
-            return
+            if reply and reply.text and "🎧 My vibe: " in reply.text:
+                text = reply.text.splitlines()[0][11::]
+            else:
+                await message.edit("<b>🚫 Please type name of the song</b>")
+                return
         link = "https://www.musixmatch.com/search/"
         page = requests.get(link + quote_plus(text) + "/tracks", headers=headers)
         soup = BeautifulSoup(page.text, "html.parser")
