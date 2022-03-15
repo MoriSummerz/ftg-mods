@@ -115,4 +115,4 @@ class LyricsMod(loader.Module):
             )
             for track in soup.find_all("li", class_="showArtist")[:10]
         ]
-        await query.answer(res, cache_time=0, link_preview=False)
+        await query.answer(res, cache_time=0)
