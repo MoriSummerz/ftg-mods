@@ -108,6 +108,7 @@ class LyricsMod(loader.Module):
                         + track.find("a", class_="title")["href"]
                     ),
                     parse_mode="HTML",
+                    disable_web_page_preview=True,
                 ),
                 **({"thumb_url": add_protocol(track.find("img")["srcset"].split()[-2])})
                 if "has-picture" in str(track)
