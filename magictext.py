@@ -4,6 +4,7 @@
     Copyright 2022 t.me/morisummerzxc
     Licensed under the Apache License, Version 2.0
 """
+# meta developer: @morisummermods
 from .. import loader, utils  # noqa
 from telethon.tl.types import Message  # noqa
 import logging
