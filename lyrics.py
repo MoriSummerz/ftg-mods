@@ -85,7 +85,7 @@ class LyricsMod(loader.Module):
             return
         link = "https://www.musixmatch.com" + track.find("a", class_="title")["href"]
         # pic = track.find('img')['srcset'].split()[-2]
-        await message.edit(get_lyrics(link))
+        await message.edit(get_lyrics(link), link_preview=False)
 
     async def lyrics_inline_handler(self, query: GeekInlineQuery) -> None:
         """Search song"""
@@ -108,6 +108,7 @@ class LyricsMod(loader.Module):
                         + track.find("a", class_="title")["href"]
                     ),
                     parse_mode="HTML",
+                    disable_web_page_preview=True,
                 ),
                 **({"thumb_url": add_protocol(track.find("img")["srcset"].split()[-2])})
                 if "has-picture" in str(track)
