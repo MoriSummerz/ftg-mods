@@ -77,7 +77,7 @@ class LyricsMod(loader.Module):
             if reply and "My vibe" in reply.raw_text:
                 text = reply.raw_text.splitlines()[0][11::]
             else:
-                await message.edit("<b>🚫 Please type name of the song</b>")
+                await utils.answer(message, "<b>🚫 Please type name of the song</b>")
                 return
         link = "https://www.musixmatch.com/search/"
         page = requests.get(link + quote_plus(text) + "/tracks", headers=headers)
