@@ -6,6 +6,7 @@
 """
 # scope: inline_content
 # requires: requests bs4
+# meta developer: @morisummermods
 from .. import loader, utils  # noqa
 from aiogram.types import (
     CallbackQuery,
@@ -71,7 +72,7 @@ class LyricsMod(loader.Module):
         text = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not text:
-            if reply and reply.text and "🎧 My vibe: " in reply.text:
+            if reply and reply.text and "🎧 My vibe: " in reply.raw_text:
                 text = reply.text.splitlines()[0][11::]
             else:
                 await message.edit("<b>🚫 Please type name of the song</b>")
