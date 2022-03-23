@@ -87,11 +87,11 @@ class LyricsMod(loader.Module):
         soup = BeautifulSoup(page.text, "html.parser")
         track = soup.find("li", class_="showArtist")
         if not track:
-            await message.edit("No results found")
+            await utils.answer(message, "<b>No results found</b>")
             return
         link = "https://www.musixmatch.com" + track.find("a", class_="title")["href"]
         # pic = track.find('img')['srcset'].split()[-2]
-        await message.edit(get_lyrics(link), link_preview=False)
+        await utils.answer(message, get_lyrics(link), link_preview=False)
 
     async def lyrics_inline_handler(self, query: GeekInlineQuery) -> None:
         """Search song"""
