@@ -74,8 +74,11 @@ class LyricsMod(loader.Module):
         text = utils.get_args_raw(message)
         reply = await message.get_reply_message()
         if not text:
-            if reply and "My vibe" in reply.raw_text:
-                text = reply.raw_text.splitlines()[0][11::]
+            if reply:
+                if "My vibe" in reply.raw_text:
+                    text = reply.raw_text.splitlines()[0][11::]
+                else:
+                    text = reply.raw_text
             else:
                 await utils.answer(message, "<b>🚫 Please type name of the song</b>")
                 return
