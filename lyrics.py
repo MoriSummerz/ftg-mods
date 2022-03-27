@@ -1,4 +1,4 @@
-__version__ = (1, 0, 1)
+__version__ = (2, 0, 0)
 
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -22,38 +22,59 @@ from ..inline import GeekInlineQuery, rand  # noqa
 from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
 import requests
-from telethon.tl.types import Message
+from telethon.tl.types import Message  # noqa
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
-headers = {
-    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "accept-encoding": "gzip, deflate, br",
-    "accept-language": "en-US,en;q=0.9,ru;q=0.8,zh-TW;q=0.7,zh;q=0.6",
-    "cache-control": "max-age=0",
-    "sec-ch-ua": '" Not A;Brand";v="99", "Chromium";v="98", "Google Chrome";v="98"',
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": '"Windows"',
-    "sec-fetch-dest": "document",
-    "sec-fetch-mode": "navigate",
-    "sec-fetch-site": "same-origin",
-    "sec-fetch-user": "?1",
-    "upgrade-insecure-requests": "1",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
+api_headers = {
+    "User-Agent": "CompuServe Classic/1.22",
+    "Accept": "application/json",
+    "Host": "api.genius.com"
 }
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36"
+}
+host = "https://api.genius.com"
+n = "\n"
 
 
-def get_lyrics(link):
-    page = requests.get(link, headers=headers)
-    soup = BeautifulSoup(page.text, "html.parser")
-    n = "\n"
-    try:
-        res = f'<b><a href="{link}">{soup.find("div", class_="lyrics-to").get_text()}</a></b>:\n'
-        res += f"<i>{''.join([p.get_text() + n for p in soup.find_all('p', class_='mxm-lyrics__content')])}</i>"
-        return res
-    except Exception:
-        return f"Lyrics not available.{n + link}"
+def get_lyrics(song_url, remove_section_headers=False):
+    page = requests.get(song_url, headers=headers)
+    html = BeautifulSoup(page.text.replace("<br/>", "\n"), "html.parser")
+    lyrics = "\n".join(
+        [
+            p.get_text()
+            for p in html.find_all("div", attrs={"data-lyrics-container": "true"})
+        ]
+    )
+    # Remove [Verse], [Bridge], etc.
+    lyrics = re.sub(r"(\[.*?\])", "</i><b>\g<1></b><i>", lyrics)
+    if remove_section_headers:
+        lyrics = re.sub(r"(\[.*?\])*", "", lyrics)
+        lyrics = re.sub("\n{2}", "\n", lyrics)
+    if not lyrics:
+        return "<b>🚫 Couldn't find the lyrics</b>"
+    return f"<i>{lyrics}</i>"
+
+
+def search(q):
+    req = requests.get(
+        f"https://api.genius.com/search?text_format=plain&q={quote_plus(q)}&access_token=uhYUr-qrBp5V3o46lA8vcaL1DKXTWVs5SDsb_0CDCIcKxKLwtapqeqkdNu8JnA6w",
+        headers=api_headers,
+    ).json()
+
+    return [
+        {
+            "artists": hit["result"]["artist_names"].replace("\u200b", ""),
+            "title": hit["result"]["title"].replace("\u200b", ""),
+            "pic": hit["result"]["header_image_thumbnail_url"],
+            "url": hit["result"]["url"],
+            "id": hit["result"]["id"],
+        }
+        for hit in req["response"]["hits"]
+    ]
 
 
 def add_protocol(x):
@@ -61,7 +82,7 @@ def add_protocol(x):
 
 
 class LyricsMod(loader.Module):
-    """Songs lyrics from Musixmatch"""
+    """Songs lyrics from Genius"""
 
     strings = {"name": "Lyrics"}
 
@@ -82,44 +103,36 @@ class LyricsMod(loader.Module):
             else:
                 await utils.answer(message, "<b>🚫 Please type name of the song</b>")
                 return
-        link = "https://www.musixmatch.com/search/"
-        page = requests.get(link + quote_plus(text) + "/tracks", headers=headers)
-        soup = BeautifulSoup(page.text, "html.parser")
-        track = soup.find("li", class_="showArtist")
-        if not track:
-            await utils.answer(message, "<b>No results found</b>")
+        tracks = search(text)
+        if len(tracks) > 0:
+            track = tracks[0]
+        else:
+            await utils.answer(message, "<b>🚫 No results found</b>")
             return
-        link = "https://www.musixmatch.com" + track.find("a", class_="title")["href"]
         # pic = track.find('img')['srcset'].split()[-2]
-        await utils.answer(message, get_lyrics(link), link_preview=False)
+        await utils.answer(message, get_lyrics(track["url"]), link_preview=False)
 
     async def lyrics_inline_handler(self, query: GeekInlineQuery) -> None:
         """Search song"""
         text = query.args
         if not text:
             return
-        endpoint = f"https://www.musixmatch.com/search/{quote_plus(text)}/tracks"
-        page = requests.get(endpoint, headers=headers)
-        soup = BeautifulSoup(page.text, "html.parser")
+        tracks = search(text)
+        if not tracks:
+            return
         res = [
             InlineQueryResultArticle(
-                id=rand(20),
-                title=track.find("a", class_="title").get_text(),
-                description=", ".join(
-                    [i.get_text() for i in track.find_all("a", class_="artist")]
-                ),
+                id=track["id"],
+                title=track["title"],
+                description=track["artists"],
+                thumb_url=add_protocol(track["pic"]),
                 input_message_content=InputTextMessageContent(
-                    get_lyrics(
-                        "https://www.musixmatch.com"
-                        + track.find("a", class_="title")["href"]
-                    ),
+                    # f"{get_lyrics(tracks['url'])}",
+                    f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}{get_lyrics(track['url'])}",
                     parse_mode="HTML",
                     disable_web_page_preview=True,
                 ),
-                **({"thumb_url": add_protocol(track.find("img")["srcset"].split()[-2])})
-                if "has-picture" in str(track)
-                else {},
             )
-            for track in soup.find_all("li", class_="showArtist")[:10]
+            for track in tracks[:10]
         ]
         await query.answer(res, cache_time=0)
