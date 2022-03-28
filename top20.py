@@ -1,11 +1,14 @@
+__version__ = (1, 2, 0)
+
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
     Copyright 2022 t.me/morisummerzxc
     Licensed under the Apache License, Version 2.0
 """
-from .. import loader, utils
-from telethon.tl.types import *
+# meta developer: @morisummermods
+from .. import loader, utils  # noqa
+from telethon.tl.types import *  # noqa
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,7 +23,6 @@ class Top20Mod(loader.Module):
         self.client = client
 
     async def top20cmd(self, message: Message) -> None:
-
         words = {}
         await message.edit("Processed 0 messages")
         total = 0
@@ -41,5 +43,4 @@ class Top20Mod(loader.Module):
             "Top {}. {} occurrences: {}\n".format(i + 1, words[freq[i]], freq[i])
             for i in range(20)
         )
-
         await message.edit(out, parse_mode=None)

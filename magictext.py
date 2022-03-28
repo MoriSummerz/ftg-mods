@@ -1,9 +1,12 @@
+__version__ = (2, 0, 0)
+
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
     Copyright 2022 t.me/morisummerzxc
     Licensed under the Apache License, Version 2.0
 """
+# scope: inline_content
 # meta developer: @morisummermods
 from .. import loader, utils  # noqa
 from telethon.tl.types import Message  # noqa

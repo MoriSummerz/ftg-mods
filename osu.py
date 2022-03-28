@@ -1,3 +1,5 @@
+__version__ = (1, 3, 0)
+
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
@@ -5,12 +7,13 @@
     Licensed under the Apache License, Version 2.0
 """
 # requires: requests emoji-country-flag
+# meta developer: @morisummermods
 import requests
 import json
-import flag
+import flag  # noqa
 
-from .. import loader, utils
-from telethon.tl.types import *
+from .. import loader, utils # noqa
+from telethon.tl.types import *  # noqa
 import logging
 
 logger = logging.getLogger(__name__)
