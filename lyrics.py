@@ -1,4 +1,4 @@
-__version__ = (2, 0, 1)
+__version__ = (2, 1, 0)
 
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -62,7 +62,7 @@ def get_lyrics(song_url, remove_section_headers=False):
         lyrics = re.sub("\n{2}", "\n", lyrics)
     if not lyrics:
         return "<b>🚫 Couldn't find the lyrics</b>"
-    return f"<i>{lyrics}</i>"
+    return lyrics
 
 
 def search(q):
@@ -102,9 +102,10 @@ class LyricsMod(loader.Module):
         reply = await message.get_reply_message()
         if not text:
             if reply:
-                if "My vibe" in reply.raw_text:
-                    text = reply.raw_text.splitlines()[0][11::]
-                else:
+                try:
+                    e = next(entity for entity in reply.entities if type(entity).__name__ == "MessageEntityCode")
+                    text = reply.raw_text[e.offset - 1:e.offset + e.length]
+                except Exception:
                     text = reply.raw_text
             else:
                 await utils.answer(message, "<b>🚫 Please type name of the song</b>")
@@ -116,7 +117,7 @@ class LyricsMod(loader.Module):
             await utils.answer(message, "<b>🚫 No results found</b>")
             return
         # pic = track.find('img')['srcset'].split()[-2]
-        await utils.answer(message, get_lyrics(track["url"]), link_preview=False)
+        await utils.answer(message, f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}<i>{get_lyrics(track['url'])}</i>")
 
     async def lyrics_inline_handler(self, query: GeekInlineQuery) -> None:
         """Search song"""
@@ -125,6 +126,18 @@ class LyricsMod(loader.Module):
             return
         tracks = search(text)
         if not tracks:
+            await query.answer(
+                [InlineQueryResultArticle(
+                    id="-1",
+                    title="No results found",
+                    description="Please try again",
+                    thumb_url="https://img.icons8.com/stickers/100/000000/nothing-found.png",
+                    input_message_content=InputTextMessageContent(
+                        f'<b>🚫 No results found for <code>{text}</code></b>', parse_mode="HTML"
+                    ),
+                )],
+                cache_time=0,
+            )
             return
         res = [
             InlineQueryResultArticle(
@@ -134,7 +147,8 @@ class LyricsMod(loader.Module):
                 thumb_url=add_protocol(track["pic"]),
                 input_message_content=InputTextMessageContent(
                     # f"{get_lyrics(tracks['url'])}",
-                    f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}{get_lyrics(track['url'])}",
+                    f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}<i>{get_lyrics(track['url'])}"[
+                    :4092] + "</i>",
                     parse_mode="HTML",
                     disable_web_page_preview=True,
                 ),
