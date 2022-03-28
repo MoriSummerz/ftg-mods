@@ -9,7 +9,6 @@ __version__ = (2, 0, 0)
 # scope: inline_content
 # requires: requests bs4
 # meta developer: @morisummermods
-from .. import loader, utils  # noqa
 from aiogram.types import (
     CallbackQuery,
     InlineKeyboardMarkup,
@@ -18,13 +17,20 @@ from aiogram.types import (
     InputTextMessageContent,
 )
 import logging
-from ..inline import GeekInlineQuery, rand  # noqa
 from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
 import requests
 from telethon.tl.types import Message  # noqa
-import logging
 import re
+from .. import loader  # noqa
+
+try:
+    from ..inline import GeekInlineQuery, rand  # noqa
+    from .. import utils  # noqa
+except ImportError:
+    from ..inline.types import GeekInlineQuery  # noqa
+    from .. import utils  # noqa
+    from ..utils import rand  # noqa
 
 logger = logging.getLogger(__name__)
 
