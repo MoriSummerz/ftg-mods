@@ -1,4 +1,4 @@
-__version__ = (2, 1, 0)
+__version__ = (2, 2, 0)
 
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 api_headers = {
     "User-Agent": "CompuServe Classic/1.22",
     "Accept": "application/json",
-    "Host": "api.genius.com"
+    "Host": "api.genius.com",
 }
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36"
@@ -87,6 +87,12 @@ def add_protocol(x):
     return x if not x.startswith("//") else f"https:{x}"
 
 
+def link(url: str) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("🎵 Full lyrics on Genius", url=url))
+    return markup
+
+
 class LyricsMod(loader.Module):
     """Songs lyrics from Genius"""
 
@@ -103,8 +109,12 @@ class LyricsMod(loader.Module):
         if not text:
             if reply:
                 try:
-                    e = next(entity for entity in reply.entities if type(entity).__name__ == "MessageEntityCode")
-                    text = reply.raw_text[e.offset - 1:e.offset + e.length]
+                    e = next(
+                        entity
+                        for entity in reply.entities
+                        if type(entity).__name__ == "MessageEntityCode"
+                    )
+                    text = reply.raw_text[e.offset - 1 : e.offset + e.length]
                 except Exception:
                     text = reply.raw_text
             else:
@@ -117,7 +127,12 @@ class LyricsMod(loader.Module):
             await utils.answer(message, "<b>🚫 No results found</b>")
             return
         # pic = track.find('img')['srcset'].split()[-2]
-        await utils.answer(message, f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}<i>{get_lyrics(track['url'])}</i>")
+        await self.inline.form(
+            f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}<i>{get_lyrics(track['url'])}</i>",
+            reply_markup=[[{"text": "🎵 Full lyrics on Genius", "url": track['url']}]],
+            force_me=False,
+            message=message,
+        )
 
     async def lyrics_inline_handler(self, query: GeekInlineQuery) -> None:
         """Search song"""
@@ -127,15 +142,18 @@ class LyricsMod(loader.Module):
         tracks = search(text)
         if not tracks:
             await query.answer(
-                [InlineQueryResultArticle(
-                    id="-1",
-                    title="No results found",
-                    description="Please try again",
-                    thumb_url="https://img.icons8.com/stickers/100/000000/nothing-found.png",
-                    input_message_content=InputTextMessageContent(
-                        f'<b>🚫 No results found for <code>{text}</code></b>', parse_mode="HTML"
-                    ),
-                )],
+                [
+                    InlineQueryResultArticle(
+                        id="-1",
+                        title="No results found",
+                        description="Please try again",
+                        thumb_url="https://img.icons8.com/stickers/100/000000/nothing-found.png",
+                        input_message_content=InputTextMessageContent(
+                            f"<b>🚫 No results found for <code>{text}</code></b>",
+                            parse_mode="HTML",
+                        ),
+                    )
+                ],
                 cache_time=0,
             )
             return
@@ -147,11 +165,12 @@ class LyricsMod(loader.Module):
                 thumb_url=add_protocol(track["pic"]),
                 input_message_content=InputTextMessageContent(
                     # f"{get_lyrics(tracks['url'])}",
-                    f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}<i>{get_lyrics(track['url'])}"[
-                    :4092] + "</i>",
+                    f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}"
+                    f"<i>{get_lyrics(track['url'])}"[:4092] + "</i>",
                     parse_mode="HTML",
                     disable_web_page_preview=True,
                 ),
+                reply_markup=link(track["url"]),
             )
             for track in tracks[:10]
         ]
