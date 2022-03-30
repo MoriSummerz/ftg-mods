@@ -163,8 +163,8 @@ class LyricsMod(loader.Module):
                 [
                     InlineQueryResultArticle(
                         id="-1",
-                        title=self.strings["noResults"],
-                        description="Please try again",
+                        title="🚫 No results found",
+                        description="😔 We couldn't find what are you looking for",
                         thumb_url="https://img.icons8.com/stickers/100/000000/nothing-found.png",
                         input_message_content=InputTextMessageContent(
                             f"{self.strings['noResults']} for <code>{text}</code>",
