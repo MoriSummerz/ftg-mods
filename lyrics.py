@@ -1,4 +1,4 @@
-__version__ = (2, 2, 0)
+__version__ = (2, 3, 0)
 
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -7,7 +7,7 @@ __version__ = (2, 2, 0)
     Licensed under the Apache License, Version 2.0
 """
 # scope: inline_content
-# requires: requests bs4
+# requires: requests bs4 spotipy
 # meta developer: @morisummermods
 from aiogram.types import (
     CallbackQuery,
@@ -16,6 +16,7 @@ from aiogram.types import (
     InlineKeyboardButton,
     InputTextMessageContent,
 )
+import spotipy
 import logging
 from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
@@ -114,7 +115,7 @@ class LyricsMod(loader.Module):
                         for entity in reply.entities
                         if type(entity).__name__ == "MessageEntityCode"
                     )
-                    text = reply.raw_text[e.offset - 1 : e.offset + e.length]
+                    text = reply.raw_text[e.offset - 1: e.offset + e.length]
                 except Exception:
                     text = reply.raw_text
             else:
@@ -128,7 +129,8 @@ class LyricsMod(loader.Module):
             return
         # pic = track.find('img')['srcset'].split()[-2]
         await self.inline.form(
-            f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}<i>{get_lyrics(track['url'])}</i>",
+            f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}"
+            f"<i>{get_lyrics(track['url'])}"[:4092] + "</i>",
             reply_markup=[[{"text": "🎵 Full lyrics on Genius", "url": track['url']}]],
             force_me=False,
             message=message,
@@ -175,3 +177,41 @@ class LyricsMod(loader.Module):
             for track in tracks[:10]
         ]
         await query.answer(res, cache_time=0)
+
+    async def slyricscmd(self, message: Message):
+        """Get lyrics from your current Spotify playback (Needs SpotifyNow module)"""
+        check = self.db.get("SpotifyNow", "acs_tkn", "404")
+        if check == "404":
+            await utils.answer(message, "<b>🚫 Please install SpotifyNow module and proceed auth</b>\n"
+                                        "🌃 Install: <code>.dlmod https://mods.hikariatama.ru/spotify.py</code>")
+            return
+        elif check is None:
+            await utils.answer(message, "<b>🚫 Execute <code>.sauth</code> before using this action.</b>")
+            return
+        try:
+            sp = spotipy.Spotify(auth=self.db.get("SpotifyNow", "acs_tkn")["access_token"])
+            current_playback = sp.current_playback()
+        except Exception:
+            await utils.answer(message, "<b>🚫 Spotify error</b>")
+            return
+        try:
+            track = current_playback["item"]["name"]
+        except Exception:
+            track = None
+        try:
+            artists = [artist["name"] for artist in current_playback["item"]["artists"]]
+        except Exception:
+            artists = None
+        tracks = search(f'{artists} {track}')
+        if len(tracks) > 0:
+            track = tracks[0]
+        else:
+            await utils.answer(message, "<b>🚫 No results found</b>")
+            return
+        await self.inline.form(
+            f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}"
+            f"<i>{get_lyrics(track['url'])}"[:4092] + "</i>",
+            reply_markup=[[{"text": "🎵 Full lyrics on Genius", "url": track['url']}]],
+            force_me=False,
+            message=message,
+        )
