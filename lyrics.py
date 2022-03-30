@@ -1,4 +1,4 @@
-__version__ = (2, 3, 1)
+__version__ = (2, 3, 2)
 
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -164,7 +164,7 @@ class LyricsMod(loader.Module):
                     InlineQueryResultArticle(
                         id="-1",
                         title="🚫 No results found",
-                        description="😔 We couldn't find what are you looking for",
+                        description="We couldn't find what are you looking for",
                         thumb_url="https://img.icons8.com/stickers/100/000000/nothing-found.png",
                         input_message_content=InputTextMessageContent(
                             f"{self.strings['noResults']} for <code>{text}</code>",
