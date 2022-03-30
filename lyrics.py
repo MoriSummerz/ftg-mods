@@ -182,7 +182,6 @@ class LyricsMod(loader.Module):
                 description=track["artists"],
                 thumb_url=add_protocol(track["pic"]),
                 input_message_content=InputTextMessageContent(
-                    # f"{get_lyrics(tracks['url'])}",
                     f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}"
                     f"<i>{get_lyrics(track['url'])}"[:4092] + "</i>",
                     parse_mode="HTML",
