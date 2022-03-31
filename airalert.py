@@ -1,4 +1,4 @@
-__version__ = (1, 0, 0)
+__version__ = (1, 0, 1)
 
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -15,7 +15,8 @@ from aiogram.types import (
     InputTextMessageContent,
 )
 from asyncio import sleep
-from telethon.tl.types import Message  # noqa
+from telethon.tl.types import Message
+from telethon.tl.functions.channels import JoinChannelRequest
 from .. import loader  # noqa
 import logging
 
@@ -193,12 +194,20 @@ class AirAlertMod(loader.Module):
         self.regions = db.get(self.strings["name"], "regions", [])
         self.bot_id = (await self.inline.bot.get_me()).id
         self.me = (await client.get_me()).id
+        try:
+            await client(JoinChannelRequest(await self.client.get_entity("t.me/air_alert_ua")))
+        except Exception:
+            logger.error("Can't join t.me/air_alert_ua")
 
     async def alert_inline_handler(self, query: GeekInlineQuery) -> None:
-        """Выбор регионов. Чтобы получать все предупреждения введите alert all"""
+        """Выбор регионов.
+        Чтобы получать все предупреждения введите alert all.
+        Чтобы посмотреть ваши регионы alert my"""
         text = query.args
         if not text:
             result = ua
+        elif text == 'my':
+            result = self.regions
         else:
             result = [region for region in ua if text.lower() in region.lower()]
         if not result:
@@ -237,17 +246,15 @@ class AirAlertMod(loader.Module):
                 state = "удален"
             self.db.set(self.strings["name"], "regions", self.regions)
             try:
-                e = self.client.get_entity(1766138888)
-                if e.left:
-                    sub = False
-                else:
-                    sub = True
+                e = await self.client.get_entity("t.me/air_alert_ua")
+                sub = not e.left
             except Exception:
                 sub = False
             n = '\n'
             res = f"<b>Регион <code>{region}</code> успешно {state}</b>{n}"
             if not sub:
-                res += "<b>ПОДПИШИСЬ НА @air_alert_ua (иначе ничего работать не будет)</b>"
+                res += "<b>НЕ ВЫХОДИ С @air_alert_ua (иначе ничего работать не будет)</b>"
+                await self.client(JoinChannelRequest(await self.client.get_entity("t.me/air_alert_ua")))
             await self.inline.form(
                 res, message=message
             )
