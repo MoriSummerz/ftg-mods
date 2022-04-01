@@ -19,19 +19,13 @@ from aiogram.types import (
     InputTextMessageContent,
 )
 from telethon.tl.functions.channels import JoinChannelRequest
+from ..inline import GeekInlineQuery, rand  # noqa
 from telethon.tl.types import Message
 from urllib.parse import quote_plus
 from .. import loader  # noqa
+from .. import utils  # noqa
 import logging
 import re
-
-try:
-    from ..inline import GeekInlineQuery, rand  # noqa
-    from .. import utils  # noqa
-except ImportError:
-    from ..inline.types import GeekInlineQuery  # noqa
-    from .. import utils  # noqa
-    from ..utils import rand  # noqa
 
 logger = logging.getLogger(__name__)
 
