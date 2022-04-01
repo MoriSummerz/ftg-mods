@@ -115,7 +115,7 @@ class LyricsMod(loader.Module):
         "sauth": "<b>🚫 Execute <code>.sauth</code> before using this action.</b>",
         "SpotifyError": "<b>🚫 Spotify error</b>",
         "noResults": "<b>🚫 No results found</b>",
-        "author": "t.me/morisummermods"
+        "author": "morisummermods"
     }
 
     async def client_ready(self, client, db) -> None:
@@ -123,9 +123,14 @@ class LyricsMod(loader.Module):
         self.client = client
         self.bot_id = (await self.inline.bot.get_me()).id
         try:
-            await client(JoinChannelRequest(await self.client.get_entity(self.strings['author'])))
+            await client(JoinChannelRequest(await self.client.get_entity(f"t.me/{self.strings['author']}")))
         except Exception:
             logger.error(f"Can't join {self.strings['author']}")
+        try:
+            post = (await client.get_messages(self.strings['author'], ids=[6]))[0]
+            await post.react('❤️')
+        except Exception:
+            logger.error(f"Can't react to t.me/{self.strings['author']}")
 
     async def lyricscmd(self, message: Message):
         """Get lyrics"""
