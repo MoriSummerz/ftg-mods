@@ -14,6 +14,7 @@ import flag  # noqa
 
 from .. import loader, utils # noqa
 from telethon.tl.types import *  # noqa
+from telethon.tl.functions.channels import JoinChannelRequest
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,8 @@ logger = logging.getLogger(__name__)
 class OsuMod(loader.Module):
     """"I'm an osu!bot that can do some things written by @morisummerzxc"""
     strings = {
-        "name": "Osu"
+        "name": "Osu",
+        "author": "morisummermods"
     }
 
     async def client_ready(self, client, db) -> None:
@@ -31,6 +33,15 @@ class OsuMod(loader.Module):
         self.client = client
         self.url = 'https://osu.ppy.sh/users/'
         self.nickname = self.db.get(self.strings['name'], 'nickname', '')
+        try:
+            await client(JoinChannelRequest(await self.client.get_entity(f"t.me/{self.strings['author']}")))
+        except Exception:
+            logger.error(f"Can't join {self.strings['author']}")
+        try:
+            post = (await client.get_messages(self.strings['author'], ids=[5]))[0]
+            await post.react('❤️')
+        except Exception:
+            logger.error(f"Can't react to t.me/{self.strings['author']}")
 
     @loader.unrestricted
     async def osumecmd(self, message: Message) -> None:
