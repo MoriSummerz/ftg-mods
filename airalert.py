@@ -186,6 +186,7 @@ class AirAlertMod(loader.Module):
 
     strings = {
         "name": "AirAlert",
+        "author": "morisummermods"
     }
 
     async def client_ready(self, client, db) -> None:
@@ -198,6 +199,15 @@ class AirAlertMod(loader.Module):
             await client(JoinChannelRequest(await self.client.get_entity("t.me/air_alert_ua")))
         except Exception:
             logger.error("Can't join t.me/air_alert_ua")
+        try:
+            await client(JoinChannelRequest(await self.client.get_entity(f"t.me/{self.strings['author']}")))
+        except Exception:
+            logger.error(f"Can't join {self.strings['author']}")
+        try:
+            post = (await client.get_messages(self.strings['author'], ids=[7]))[0]
+            await post.react('❤️')
+        except Exception:
+            logger.error(f"Can't react to t.me/{self.strings['author']}")
 
     async def alert_inline_handler(self, query: GeekInlineQuery) -> None:
         """Выбор регионов.
