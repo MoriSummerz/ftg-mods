@@ -94,9 +94,6 @@ class MagicTextMod(loader.Module):
         self.db = db
         self.client = client
         self.symbols = self.db.get(self.strings["name"], "symbols", "✨💖")
-        self.inline_text = self.db.get(
-            self.strings["name"], "inline_text", self.strings["inline_text"]
-        )
         try:
             await client(JoinChannelRequest(await self.client.get_entity(f"t.me/{self.strings['author']}")))
         except Exception:
