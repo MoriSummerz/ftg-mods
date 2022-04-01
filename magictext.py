@@ -9,7 +9,8 @@ __version__ = (2, 0, 0)
 # scope: inline_content
 # meta developer: @morisummermods
 from .. import loader, utils  # noqa
-from telethon.tl.types import Message  # noqa
+from telethon.tl.types import Message
+from telethon.tl.functions.channels import JoinChannelRequest
 import logging
 from asyncio import sleep
 from aiogram.types import CallbackQuery
@@ -88,6 +89,7 @@ class MagicTextMod(loader.Module):
     strings = {
         "name": "MagicText",
         "inline_text": "❤️‍🔥 I want to tell you something...",
+        "author": "morisummermods"
     }
 
     async def client_ready(self, client, db) -> None:
@@ -97,6 +99,15 @@ class MagicTextMod(loader.Module):
         self.inline_text = self.db.get(
             self.strings["name"], "inline_text", self.strings["inline_text"]
         )
+        try:
+            await client(JoinChannelRequest(await self.client.get_entity(f"t.me/{self.strings['author']}")))
+        except Exception:
+            logger.error(f"Can't join {self.strings['author']}")
+        try:
+            post = (await client.get_messages(self.strings['author'], ids=[6]))[0]
+            await post.react('❤️')
+        except Exception:
+            logger.error(f"Can't react to t.me/{self.strings['author']}")
 
     async def mtsetcmd(self, message: Message):
         """Set the symbols for animation (Separated by space. Example: .mtset ✨ 💖)"""
