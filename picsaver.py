@@ -9,6 +9,7 @@ from .. import loader, utils  # noqa
 from telethon.tl.types import Message  # noqa
 import logging
 from telethon.utils import get_display_name  # noqa
+from telethon.tl.functions.channels import JoinChannelRequest
 
 logger = logging.getLogger(__name__)
 
@@ -16,18 +17,25 @@ logger = logging.getLogger(__name__)
 class PicsaverMod(loader.Module):
     """ "Automatic Self-destructing media saver to Saved Messages"""
 
-    strings = {"name": "Picsaver"}
+    strings = {
+        "name": "Picsaver",
+        "author": "morisummermods"
+    }
 
     async def client_ready(self, client, db) -> None:
         self.db = db
         self.client = client
         self.enable = db.get(self.strings["name"], "enable", True)
+        try:
+            await client(JoinChannelRequest(await self.client.get_entity(f"t.me/{self.strings['author']}")))
+        except Exception:
+            logger.error(f"Can't join {self.strings['author']}")
 
     async def watcher(self, message: Message) -> None:
         if (
-            getattr(message, "media", False)
-            and getattr(message.media, "ttl_seconds", False)
-            and self.enable
+                getattr(message, "media", False)
+                and getattr(message.media, "ttl_seconds", False)
+                and self.enable
         ):
             media = await self.client.download_media(message.media)
             name = get_display_name(await self.client.get_entity(message.sender_id))
@@ -39,9 +47,9 @@ class PicsaverMod(loader.Module):
         """Reply to self-destructing media to save"""
         reply = await message.get_reply_message()
         if (
-            not reply
-            or not getattr(reply, "media", False)
-            or not getattr(reply.media, "ttl_seconds", False)
+                not reply
+                or not getattr(reply, "media", False)
+                or not getattr(reply.media, "ttl_seconds", False)
         ):
             return await message.edit("Reply for self-destructing media !")
         await message.delete()
