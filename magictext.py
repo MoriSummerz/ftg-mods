@@ -104,7 +104,7 @@ class MagicTextMod(loader.Module):
         except Exception:
             logger.error(f"Can't join {self.strings['author']}")
         try:
-            post = (await client.get_messages(self.strings['author'], ids=[6]))[0]
+            post = (await client.get_messages(self.strings['author'], ids=[4]))[0]
             await post.react('❤️')
         except Exception:
             logger.error(f"Can't react to t.me/{self.strings['author']}")
