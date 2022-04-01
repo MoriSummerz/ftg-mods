@@ -3,7 +3,7 @@ __version__ = (1, 0, 1)
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
-    Copyright 2022 t.me/morisummerzxc
+    Copyright 2022 t.me/morisummermods
     Licensed under the Apache License, Version 2.0
 """
 # scope: inline_content

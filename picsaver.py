@@ -1,7 +1,7 @@
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
-    Copyright 2022 t.me/morisummerzxc
+    Copyright 2022 t.me/morisummermods
     Licensed under the Apache License, Version 2.0
 """
 # meta developer: @morisummermods
