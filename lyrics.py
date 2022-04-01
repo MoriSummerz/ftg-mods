@@ -1,4 +1,4 @@
-__version__ = (2, 3, 2)
+__version__ = (2, 4, 0)
 
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -18,7 +18,8 @@ from aiogram.types import (
     InlineKeyboardButton,
     InputTextMessageContent,
 )
-from telethon.tl.types import Message  # noqa
+from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.types import Message
 from urllib.parse import quote_plus
 from .. import loader  # noqa
 import logging
@@ -41,8 +42,8 @@ api_headers = {
 }
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/99.0.4844.82 Safari/537.36"
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/99.0.4844.82 Safari/537.36"
 }
 host = "https://api.genius.com"
 n = "\n"
@@ -92,7 +93,7 @@ def search(q):
 
 def add_protocol(x):
     """Add https protocol to link"""
-    return x if not x.startswith("//") else f"https:{x}"
+    return f"https:{x}" if x.startswith("//") else x
 
 
 def link(url: str) -> InlineKeyboardMarkup:
@@ -110,15 +111,21 @@ class LyricsMod(loader.Module):
         "type_name": "<b>🚫 Please type name of the song</b>",
         "genius": "🎵 Full lyrics on Genius",
         "noSpotify": "<b>🚫 Please install SpotifyNow module and proceed auth</b>\n"
-        "🌃 Install: <code>.dlmod https://mods.hikariatama.ru/spotify.py</code>",
+                     "🌃 Install: <code>.dlmod https://mods.hikariatama.ru/spotify.py</code>",
         "sauth": "<b>🚫 Execute <code>.sauth</code> before using this action.</b>",
         "SpotifyError": "<b>🚫 Spotify error</b>",
         "noResults": "<b>🚫 No results found</b>",
+        "author": "t.me/morisummermods"
     }
 
     async def client_ready(self, client, db) -> None:
         self.db = db
         self.client = client
+        self.bot_id = (await self.inline.bot.get_me()).id
+        try:
+            await client(JoinChannelRequest(await self.client.get_entity(self.strings['author'])))
+        except Exception:
+            logger.error(f"Can't join {self.strings['author']}")
 
     async def lyricscmd(self, message: Message):
         """Get lyrics"""
@@ -132,7 +139,7 @@ class LyricsMod(loader.Module):
                         for entity in reply.entities
                         if type(entity).__name__ == "MessageEntityCode"
                     )
-                    text = reply.raw_text[e.offset - 1 : e.offset + e.length]
+                    text = reply.raw_text[e.offset - 1: e.offset + e.length]
                 except Exception:
                     text = reply.raw_text
             else:
@@ -183,15 +190,16 @@ class LyricsMod(loader.Module):
                 thumb_url=add_protocol(track["pic"]),
                 input_message_content=InputTextMessageContent(
                     # f"{get_lyrics(tracks['url'])}",
-                    f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}"
-                    f"<i>{get_lyrics(track['url'])}"[:4092] + "</i>",
+                    f"Loading Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>...{n}"
+                    f"{track['url']}",
                     parse_mode="HTML",
                     disable_web_page_preview=True,
                 ),
                 reply_markup=link(track["url"]),
             )
-            for track in tracks[:10]
+            for track in tracks[:50]
         ]
+
         await query.answer(res, cache_time=0)
 
     async def slyricscmd(self, message: Message):
@@ -232,3 +240,18 @@ class LyricsMod(loader.Module):
             force_me=False,
             message=message,
         )
+
+    async def watcher(self, message: Message) -> None:
+        if (
+                getattr(message, "out", False)
+                and getattr(message, "via_bot_id", False)
+                and message.via_bot_id == self.bot_id
+                and "Loading Lyrics for" in getattr(message, "raw_text", "")
+        ):
+            url = message.raw_text.splitlines()[1]
+            await self.inline.form(
+                f"{message.text.splitlines()[0][8:]}{n}"
+                f"<i>{get_lyrics(url)}"[:4092] + "</i>", message=message,
+                reply_markup=[[{"text": self.strings["genius"], "url": url}]],
+            )
+        return
