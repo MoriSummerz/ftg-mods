@@ -194,6 +194,7 @@ class AirAlertMod(loader.Module):
         self.client = client
         self.regions = db.get(self.strings["name"], "regions", [])
         self.bot_id = (await self.inline.bot.get_me()).id
+        self.forwards = db.get(self.strings["name"], "forwards", [])
         self.me = (await client.get_me()).id
         try:
             await client(JoinChannelRequest(await self.client.get_entity("t.me/air_alert_ua")))
@@ -208,6 +209,30 @@ class AirAlertMod(loader.Module):
             await post.react('❤️')
         except Exception:
             logger.error(f"Can't react to t.me/{self.strings['author']}")
+
+    async def alertforwardcmd(self, message: Message) -> None:
+        """Перенаправление предупреждений в другие чаты. Для добавления/удаления введите команду с ссылкой на чат.
+        Для просмотра чатов введите команду без аргументов"""
+        text = utils.get_args_raw(message)
+        if not text:
+            chats = "<b>Текущие чаты для перенаправления: </b>\n"
+            for chat in self.forwards:
+                chats += (await self.client.get_entity(chat)).title + "\n"
+            await utils.answer(message, chats)
+            return
+        try:
+            chat = (await self.client.get_entity(text.replace("https://", ""))).id
+        except Exception:
+            await utils.answer(message, "<b>Чат не найден</b>")
+            return
+        if chat in self.forwards:
+            self.forwards.remove(chat)
+            self.db.set(self.strings['name'], "forwards", self.forwards)
+            await utils.answer(message, "<b>Чат успешно удален для перенаправления</b>")
+        else:
+            self.forwards.append(chat)
+            self.db.set(self.strings['name'], "forwards", self.forwards)
+            await utils.answer(message, "<b>Чат успешно установлен для перенаправления</b>")
 
     async def alert_inline_handler(self, query: GeekInlineQuery) -> None:
         """Выбор регионов.
@@ -281,4 +306,6 @@ class AirAlertMod(loader.Module):
                     self.me, message.text, parse_mode="HTML"
                 )
                 await sleep(1)
+            for chat in self.forwards:
+                await self.client.send_message(chat, message.text)
         return
