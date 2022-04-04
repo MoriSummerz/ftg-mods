@@ -30,7 +30,9 @@ import re
 logger = logging.getLogger(__name__)
 
 api_headers = {
-    "User-Agent": "CompuServe Classic/1.22",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/99.0.4844.82 Safari/537.36",
     "Accept": "application/json",
     "Host": "api.genius.com",
 }
