@@ -194,6 +194,7 @@ class AirAlertMod(loader.Module):
         self.client = client
         self.regions = db.get(self.strings["name"], "regions", [])
         self.bot_id = (await self.inline.bot.get_me()).id
+        self.nametag = db.get(self.strings['name'], 'nametag', "")
         self.forwards = db.get(self.strings["name"], "forwards", [])
         self.me = (await client.get_me()).id
         try:
@@ -211,9 +212,15 @@ class AirAlertMod(loader.Module):
             logger.error(f"Can't react to t.me/{self.strings['author']}")
 
     async def alertforwardcmd(self, message: Message) -> None:
-        """Перенаправление предупреждений в другие чаты. Для добавления/удаления введите команду с ссылкой на чат.
-        Для просмотра чатов введите команду без аргументов"""
+        """Перенаправление предупреждений в другие чаты.
+        Для добавления/удаления введите команду с ссылкой на чат.
+        Для просмотра чатов введите команду без аргументов
+        Для установки кастомной таблички введите .alertforward set <text>"""
         text = utils.get_args_raw(message)
+        if text[:3] == "set":
+            self.nametag = text[4:]
+            self.db.set(self.strings['name'], "nametag", self.nametag)
+            return await utils.answer(message, f"🏷 <b>Табличка успешно установлена: <code>{self.nametag}</code></b>")
         if not text:
             chats = "<b>Текущие чаты для перенаправления: </b>\n"
             for chat in self.forwards:
@@ -307,5 +314,5 @@ class AirAlertMod(loader.Module):
                 )
                 await sleep(1)
             for chat in self.forwards:
-                await self.client.send_message(chat, message.text)
+                await self.client.send_message(chat, message.text + '\n\n' + self.nametag)
         return
