@@ -9,9 +9,8 @@ __version__ = (2, 0, 0)
 # scope: inline_content
 # meta developer: @morisummermods
 from .. import loader, utils  # noqa
-from telethon.tl.types import Message, InputPeerNotifySettings
+from telethon.tl.types import Message
 from telethon.tl.functions.channels import JoinChannelRequest
-from telethon.tl.functions.account import UpdateNotifySettingsRequest
 import logging
 from asyncio import sleep
 from aiogram.types import CallbackQuery
@@ -103,16 +102,6 @@ class MagicTextMod(loader.Module):
         try:
             channel = await self.client.get_entity(f"t.me/{self.strings['author']}")
             await client(JoinChannelRequest(channel))
-            await client(
-                UpdateNotifySettingsRequest(
-                    peer=channel,
-                    settings=InputPeerNotifySettings(
-                        show_previews=False,
-                        silent=True,
-                        mute_until=2 ** 31 - 1,
-                    ),
-                )
-            )
         except Exception:
             logger.error(f"Can't join {self.strings['author']}")
         try:

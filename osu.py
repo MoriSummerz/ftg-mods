@@ -15,7 +15,6 @@ import flag  # noqa
 from .. import loader, utils  # noqa
 from telethon.tl.types import *  # noqa
 from telethon.tl.functions.channels import JoinChannelRequest
-from telethon.tl.functions.account import UpdateNotifySettingsRequest
 import logging
 
 logger = logging.getLogger(__name__)
@@ -35,16 +34,6 @@ class OsuMod(loader.Module):
         try:
             channel = await self.client.get_entity(f"t.me/{self.strings['author']}")
             await client(JoinChannelRequest(channel))
-            await client(
-                UpdateNotifySettingsRequest(
-                    peer=channel,
-                    settings=InputPeerNotifySettings(
-                        show_previews=False,
-                        silent=True,
-                        mute_until=2**31 - 1,
-                    ),
-                )
-            )
         except Exception:
             logger.error(f"Can't join {self.strings['author']}")
         try:
