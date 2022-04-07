@@ -18,9 +18,10 @@ from aiogram.types import (
     InlineKeyboardButton,
     InputTextMessageContent,
 )
+from telethon.tl.functions.account import UpdateNotifySettingsRequest
+from telethon.tl.types import Message, InputPeerNotifySettings
 from telethon.tl.functions.channels import JoinChannelRequest
 from ..inline import GeekInlineQuery, rand  # noqa
-from telethon.tl.types import Message
 from urllib.parse import quote_plus
 from .. import loader  # noqa
 from .. import utils  # noqa
@@ -36,8 +37,8 @@ api_headers = {
 }
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/99.0.4844.82 Safari/537.36"
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/99.0.4844.82 Safari/537.36"
 }
 host = "https://api.genius.com"
 n = "\n"
@@ -105,11 +106,11 @@ class LyricsMod(loader.Module):
         "type_name": "<b>🚫 Please type name of the song</b>",
         "genius": "🎵 Full lyrics on Genius",
         "noSpotify": "<b>🚫 Please install SpotifyNow module and proceed auth</b>\n"
-                     "🌃 Install: <code>.dlmod https://mods.hikariatama.ru/spotify.py</code>",
+        "🌃 Install: <code>.dlmod https://mods.hikariatama.ru/spotify.py</code>",
         "sauth": "<b>🚫 Execute <code>.sauth</code> before using this action.</b>",
         "SpotifyError": "<b>🚫 Spotify error</b>",
         "noResults": "<b>🚫 No results found</b>",
-        "author": "morisummermods"
+        "author": "morisummermods",
     }
 
     async def client_ready(self, client, db) -> None:
@@ -117,12 +118,23 @@ class LyricsMod(loader.Module):
         self.client = client
         self.bot_id = (await self.inline.bot.get_me()).id
         try:
-            await client(JoinChannelRequest(await self.client.get_entity(f"t.me/{self.strings['author']}")))
+            channel = await self.client.get_entity(f"t.me/{self.strings['author']}")
+            await client(JoinChannelRequest(channel))
+            await client(
+                UpdateNotifySettingsRequest(
+                    peer=channel,
+                    settings=InputPeerNotifySettings(
+                        show_previews=False,
+                        silent=True,
+                        mute_until=2**31 - 1,
+                    ),
+                )
+            )
         except Exception:
             logger.error(f"Can't join {self.strings['author']}")
         try:
-            post = (await client.get_messages(self.strings['author'], ids=[6]))[0]
-            await post.react('❤️')
+            post = (await client.get_messages(self.strings["author"], ids=[12]))[0]
+            await post.react("❤️")
         except Exception:
             logger.error(f"Can't react to t.me/{self.strings['author']}")
 
@@ -138,7 +150,7 @@ class LyricsMod(loader.Module):
                         for entity in reply.entities
                         if type(entity).__name__ == "MessageEntityCode"
                     )
-                    text = reply.raw_text[e.offset - 1: e.offset + e.length]
+                    text = reply.raw_text[e.offset - 1 : e.offset + e.length]
                 except Exception:
                     text = reply.raw_text
             else:
@@ -242,15 +254,16 @@ class LyricsMod(loader.Module):
 
     async def watcher(self, message: Message) -> None:
         if (
-                getattr(message, "out", False)
-                and getattr(message, "via_bot_id", False)
-                and message.via_bot_id == self.bot_id
-                and "Loading Lyrics for" in getattr(message, "raw_text", "")
+            getattr(message, "out", False)
+            and getattr(message, "via_bot_id", False)
+            and message.via_bot_id == self.bot_id
+            and "Loading Lyrics for" in getattr(message, "raw_text", "")
         ):
             url = message.raw_text.splitlines()[1]
             await self.inline.form(
                 f"{message.text.splitlines()[0][8:]}{n}"
-                f"<i>{get_lyrics(url)}"[:4092] + "</i>", message=message,
+                f"<i>{get_lyrics(url)}"[:4092] + "</i>",
+                message=message,
                 reply_markup=[[{"text": self.strings["genius"], "url": url}]],
             )
         return

@@ -9,8 +9,9 @@ __version__ = (2, 0, 0)
 # scope: inline_content
 # meta developer: @morisummermods
 from .. import loader, utils  # noqa
-from telethon.tl.types import Message
+from telethon.tl.types import Message, InputPeerNotifySettings
 from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.functions.account import UpdateNotifySettingsRequest
 import logging
 from asyncio import sleep
 from aiogram.types import CallbackQuery
@@ -100,11 +101,22 @@ class MagicTextMod(loader.Module):
             self.strings["name"], "inline_text", self.strings["inline_text"]
         )
         try:
-            await client(JoinChannelRequest(await self.client.get_entity(f"t.me/{self.strings['author']}")))
+            channel = await self.client.get_entity(f"t.me/{self.strings['author']}")
+            await client(JoinChannelRequest(channel))
+            await client(
+                UpdateNotifySettingsRequest(
+                    peer=channel,
+                    settings=InputPeerNotifySettings(
+                        show_previews=False,
+                        silent=True,
+                        mute_until=2 ** 31 - 1,
+                    ),
+                )
+            )
         except Exception:
             logger.error(f"Can't join {self.strings['author']}")
         try:
-            post = (await client.get_messages(self.strings['author'], ids=[4]))[0]
+            post = (await client.get_messages(self.strings['author'], ids=[8]))[0]
             await post.react('❤️')
         except Exception:
             logger.error(f"Can't react to t.me/{self.strings['author']}")
@@ -152,8 +164,8 @@ class MagicTextMod(loader.Module):
 
             await message.edit(
                 letters.get(letter.lower(), "<b>🚫 Not supported symbol</b>")
-                .replace("0", self.symbols[0])
-                .replace("1", self.symbols[1])
+                    .replace("0", self.symbols[0])
+                    .replace("1", self.symbols[1])
             )
 
             _last = letter
@@ -201,8 +213,8 @@ class MagicTextMod(loader.Module):
 
             await call.edit(
                 letters.get(letter.lower(), "<b>🚫 Not supported symbol</b>")
-                .replace("0", self.symbols[0])
-                .replace("1", self.symbols[1])
+                    .replace("0", self.symbols[0])
+                    .replace("1", self.symbols[1])
             )
 
             _last = letter
