@@ -1,4 +1,4 @@
-__version__ = (2, 4, 0)
+__version__ = (2, 5, 0)
 
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -108,7 +108,7 @@ class LyricsMod(loader.Module):
         "🌃 Install: <code>.dlmod https://mods.hikariatama.ru/spotify.py</code>",
         "sauth": "<b>🚫 Execute <code>.sauth</code> before using this action.</b>",
         "SpotifyError": "<b>🚫 Spotify error</b>",
-        "noResults": "<b>🚫 No results found</b>",
+        "noResults": "<b>🚫 No results found for <code>{}</code></b>",
         "author": "morisummermods",
     }
 
@@ -133,23 +133,29 @@ class LyricsMod(loader.Module):
         reply = await message.get_reply_message()
         if not text:
             if reply:
-                try:
-                    e = next(
-                        entity
-                        for entity in reply.entities
-                        if type(entity).__name__ == "MessageEntityCode"
-                    )
-                    text = reply.raw_text[e.offset - 1 : e.offset + e.length]
-                except Exception:
-                    text = reply.raw_text
+                if (
+                    getattr(reply, "media", None)
+                    and getattr(reply.media, "document", None)
+                    and getattr(reply.media.document, "attributes", None)
+                ):
+                    text = reply.media.document.attributes[1].file_name.rsplit('.', 1)[0]
+                else:
+                    try:
+                        e = next(
+                            entity
+                            for entity in reply.entities
+                            if type(entity).__name__ == "MessageEntityCode"
+                        )
+                        text = reply.raw_text[e.offset - 1 : e.offset + e.length]
+                    except Exception:
+                        text = reply.raw_text
             else:
                 await utils.answer(message, self.strings["type_name"])
                 return
-        tracks = search(text)
-        if len(tracks) > 0:
+        if tracks := search(text):
             track = tracks[0]
         else:
-            await utils.answer(message, self.strings["noResults"])
+            await utils.answer(message, self.strings["noResults"].format(text))
             return
         await self.inline.form(
             f"Lyrics for <b>{track['title']}</b> by <b>{track['artists']}</b>{n}"
