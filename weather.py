@@ -1,4 +1,4 @@
-__version__ = (1, 0, 0)
+__version__ = (1, 0, 1)
 
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -61,7 +61,7 @@ class WeatherMod(loader.Module):
         """Current forecast for provided city"""
         city = utils.get_args_raw(message)
         req = requests.get(f"https://wttr.in/{city}?m&T")
-        await utils.answer(message, f'<code>{n.join(req.text.splitlines()[:6])}</code>')
+        await utils.answer(message, f'<code>{n.join(req.text.splitlines()[:7])}</code>')
 
     async def new_inline_handler_(self, query: GeekInlineQuery) -> None:
         args = query.args
