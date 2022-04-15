@@ -60,7 +60,7 @@ class WeatherMod(loader.Module):
     async def weathercmd(self, message: Message) -> None:
         """Current forecast for provided city"""
         city = utils.get_args_raw(message)
-        req = requests.get(f"https://wttr.in/{city}?M&T")
+        req = requests.get(f"https://wttr.in/{city}?m&T")
         await utils.answer(message, f'<code>{n.join(req.text.splitlines()[:6])}</code>')
 
     async def new_inline_handler_(self, query: GeekInlineQuery) -> None:
