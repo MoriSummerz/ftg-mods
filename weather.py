@@ -37,7 +37,7 @@ def escape_ansi(line):
 
 class WeatherMod(loader.Module):
     """Weather module"""
-    id = 0
+    id = 17
     strings = {
         "name": "Weather",
         "author": "morisummermods",
@@ -52,7 +52,7 @@ class WeatherMod(loader.Module):
         except Exception:
             logger.error(f"Can't join {self.strings['author']}")
         try:
-            post = (await client.get_messages(self.strings["author"], ids=[self.id]))[17]
+            post = (await client.get_messages(self.strings["author"], ids=[self.id]))[0]
             await post.react("❤️")
         except Exception:
             logger.error(f"Can't react to t.me/{self.strings['author']}")
