@@ -1,4 +1,4 @@
-__version__ = (1, 0, 1)
+__version__ = (1, 1, 0)
 
 """"
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -28,7 +28,7 @@ import re
 logger = logging.getLogger(__name__)
 
 n = '\n'
-
+rus = "ёйцукенгшщзхъфывапролджэячсмитьбю"
 
 def escape_ansi(line):
     ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
@@ -52,36 +52,48 @@ class WeatherMod(loader.Module):
         except Exception:
             logger.error(f"Can't join {self.strings['author']}")
         try:
-            post = (await client.get_messages(self.strings["author"], ids=[self.id]))[0]
+            post = (await client.get_messages(self.strings["author"], ids=[self.id]))[16]
             await post.react("❤️")
         except Exception:
             logger.error(f"Can't react to t.me/{self.strings['author']}")
 
+    async def weathercitycmd(self, message: Message) -> None:
+        """Set default city for forecast"""
+        if args := utils.get_args_raw(message):
+            self.db.set(self.strings['name'], 'city', args)
+        await utils.answer(message, f"<b>🏙 Your current city: "
+                                    f"<code>{self.db.get(self.strings['name'], 'city', '🚫 Not specified')}</code></b>")
+        return
+
     async def weathercmd(self, message: Message) -> None:
         """Current forecast for provided city"""
         city = utils.get_args_raw(message)
-        req = requests.get(f"https://wttr.in/{city}?m&T")
+        if not city:
+            city = self.db.get(self.strings['name'], 'city', "")
+        lang = 'ru' if city[0].lower() in rus else 'en'
+        req = requests.get(f"https://wttr.in/{city}?m&T&lang={lang}")
         await utils.answer(message, f'<code>{n.join(req.text.splitlines()[:7])}</code>')
 
-    async def new_inline_handler_(self, query: GeekInlineQuery) -> None:
+    async def weather_inline_handler(self, query: GeekInlineQuery) -> None:
+        """Search city"""
         args = query.args
-        req = requests.get(f"https://wttr.in/{quote_plus(args)}?format=j1").json()
-        current = req["current_condition"]
+        if not args:
+            args = self.db.get(self.strings['name'], 'city', "")
+        # req = requests.get(f"https://wttr.in/{quote_plus(args)}?format=j1").json()
+        lang = 'ru' if args[0].lower() in rus else 'en'
+        req = requests.get(f"https://wttr.in/{quote_plus(args)}?format=3")
         await query.answer(
             [
                 InlineQueryResultArticle(
                     id=rand(20),
                     title=f"Forecast for {args}",
-                    description="Current forecast",
-                    thumb_url="https://i.ytimg.com/vi/IMLwb8DIksk/maxresdefault.jpg",
+                    description=req.text,
+                    # thumb_url="https://i.ytimg.com/vi/IMLwb8DIksk/maxresdefault.jpg",
                     input_message_content=InputTextMessageContent(
-                        "Hello world",
+                        f'<code>{n.join(requests.get(f"https://wttr.in/{args}?m&T&lang={lang}").text.splitlines()[:7])}</code>',
                         parse_mode="HTML",
                     ),
                 )
             ],
             cache_time=0,
         )
-
-    async def watcher(self, message: Message) -> None:
-        pass
