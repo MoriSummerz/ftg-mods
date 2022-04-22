@@ -3,7 +3,7 @@ __version__ = (1, 0, 1)
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
     Copyright 2022 t.me/morisummermods
-    Licensed under the Apache License, Version 2.0
+    Licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 """
 from .. import loader, utils  # noqa
 from asyncio import sleep
