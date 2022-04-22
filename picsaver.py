@@ -1,8 +1,8 @@
-""""
+"""
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
     Copyright 2022 t.me/morisummermods
-    Licensed under the Apache License, Version 2.0
+    Licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 """
 # meta developer: @morisummermods
 from .. import loader, utils  # noqa
