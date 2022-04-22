@@ -4,7 +4,7 @@ __version__ = (0, 0, 1)
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
     Copyright 2022 t.me/morisummermods
-    Licensed under the Apache License, Version 2.0
+    Licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 """
 # scope: inline_content
 # meta developer: @morisummermods
