@@ -4,7 +4,7 @@ __version__ = (2, 6, 0)
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
     Copyright 2022 t.me/morisummermods
-    Licensed under the Apache License, Version 2.0
+    Licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 """
 # scope: inline_content
 # requires: requests bs4 spotipy
