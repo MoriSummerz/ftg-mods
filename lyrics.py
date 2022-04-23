@@ -1,4 +1,4 @@
-__version__ = (2, 6, 0)
+__version__ = (2, 6, 1)
 
 """
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
@@ -89,7 +89,7 @@ def add_protocol(x):
     """Add https protocol to link"""
     return f"https:{x}" if x.startswith("//") else x
 
-
+@loader.tds
 class LyricsMod(loader.Module):
     """Song lyrics from Genius"""
 
