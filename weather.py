@@ -1,6 +1,6 @@
 __version__ = (1, 1, 0)
 
-""""
+"""
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
     Copyright 2022 t.me/morisummermods
@@ -79,8 +79,10 @@ class WeatherMod(loader.Module):
         args = query.args
         if not args:
             args = self.db.get(self.strings['name'], 'city', "")
+        if not args:
+            return
         # req = requests.get(f"https://wttr.in/{quote_plus(args)}?format=j1").json()
-            lang = 'ru' if args and args[0].lower() in rus else 'en'
+        lang = 'ru' if args and args[0].lower() in rus else 'en'
         req = requests.get(f"https://wttr.in/{quote_plus(args)}?format=3")
         await query.answer(
             [
