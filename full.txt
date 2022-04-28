@@ -4,3 +4,4 @@ qr
 top20
 lyrics
 picsaver
+weather
