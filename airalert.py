@@ -8,6 +8,9 @@ __version__ = (1, 1, 0)
 """
 # scope: inline_content
 # meta developer: @morisummermods
+# meta banner: https://i.imgur.com/V0Qhyi0.jpg
+# meta pic: https://i.imgur.com/AwKGCQe.png
+
 from aiogram.types import (
     InlineKeyboardMarkup,
     InlineQueryResultArticle,
@@ -272,10 +275,10 @@ class AirAlertMod(loader.Module):
 
     async def watcher(self, message: Message) -> None:
         if (
-            getattr(message, "out", False)
-            and getattr(message, "via_bot_id", False)
-            and message.via_bot_id == self.bot_id
-            and "⌛ Редактирование региона" in getattr(message, "raw_text", "")
+                getattr(message, "out", False)
+                and getattr(message, "via_bot_id", False)
+                and message.via_bot_id == self.bot_id
+                and "⌛ Редактирование региона" in getattr(message, "raw_text", "")
         ):
             self.regions = self.db.get(self.strings["name"], "regions", [])
             region = message.raw_text[25:]
@@ -304,12 +307,12 @@ class AirAlertMod(loader.Module):
                 )
             await self.inline.form(res, message=message)
         if (
-            getattr(message, "peer_id", False)
-            and getattr(message.peer_id, "channel_id", 0) == 1766138888
-            and (
+                getattr(message, "peer_id", False)
+                and getattr(message.peer_id, "channel_id", 0) == 1766138888
+                and (
                 "all" in self.regions
                 or any(reg in message.raw_text for reg in self.regions)
-            )
+        )
         ):
             for _ in range(3):
                 await self.inline.bot.send_message(

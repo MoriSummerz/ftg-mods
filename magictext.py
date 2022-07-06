@@ -8,6 +8,9 @@ __version__ = (2, 0, 0)
 """
 # scope: inline_content
 # meta developer: @morisummermods
+# meta banner: https://i.imgur.com/3joMFwC.jpg
+# meta pic: https://i.imgur.com/nmAXM3k.png
+
 from .. import loader, utils  # noqa
 from telethon.tl.types import Message
 from telethon.tl.functions.channels import JoinChannelRequest

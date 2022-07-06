@@ -9,6 +9,9 @@ __version__ = (1, 1, 0)
 # scope: inline_content
 # requires: requests
 # meta developer: @morisummermods
+# meta banner: https://i.imgur.com/JR6VqYF.png
+# meta pic: https://i.imgur.com/iwoskSb.png
+
 import requests
 from aiogram.types import (
     InlineKeyboardMarkup,

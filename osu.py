@@ -8,6 +8,11 @@ __version__ = (1, 3, 0)
 """
 # requires: requests emoji-country-flag
 # meta developer: @morisummermods
+# meta banner: https://i.imgur.com/fPWWFrL.jpg
+# meta pic: https://i.imgur.com/fcHCrS2.png
+
+
+
 import requests
 import json
 import flag  # noqa
