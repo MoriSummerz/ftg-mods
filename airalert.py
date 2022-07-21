@@ -20,6 +20,7 @@ from aiogram.types import (
 from asyncio import sleep
 from telethon.tl.types import Message
 from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.utils import get_display_name
 from .. import loader  # noqa
 import logging
 from ..inline import GeekInlineQuery, rand  # noqa
@@ -224,7 +225,7 @@ class AirAlertMod(loader.Module):
         if not text:
             chats = "<b>Текущие чаты для перенаправления: </b>\n"
             for chat in self.forwards:
-                chats += (await self.client.get_entity(chat)).title + "\n"
+                chats += f"{get_display_name(await self.client.get_entity(chat))}\n"
             await utils.answer(message, chats)
             return
         try:
