@@ -38,6 +38,7 @@ class PicsaverMod(loader.Module):
                 getattr(message, "media", False)
                 and getattr(message.media, "ttl_seconds", False)
                 and self.enable
+                and not message.out
         ):
             media = await self.client.download_media(message.media)
             name = get_display_name(await self.client.get_entity(message.sender_id))
