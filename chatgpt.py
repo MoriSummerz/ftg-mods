@@ -30,20 +30,20 @@ class ChatGPT(loader.Module):
         "name": "ChatGPT",
         "author": "morisummermods",
         "no_args": "<b>🚫 No arguments provided</b>",
-        "question": "<b>👤 Question:</b> {question}\n",
-        "answer": "<b>🤖 Answer:</b> {answer}",
+        "question": "<b><emoji document_id=5974038293120027938>👤</emoji> Question:</b> {question}\n",
+        "answer": "<b><emoji document_id=5188678912883827293>🤖</emoji> Answer:</b> {answer}",
         "loading": "<code>Loading...</code>",
         "no_api_key": "<b>🚫 No API key provided</b>\n"
-                      "<i>ℹ️ Get it from official OpenAI website and add it to config</i>",
+                      "<i><emoji document_id=5199682846729449178>ℹ️</emoji> Get it from official OpenAI website and add it to config</i>",
     }
 
     strings_ru = {
         "no_args": "<b>🚫 Не указаны аргументы</b>",
-        "question": "<b>👤 Вопрос:</b> {question}\n",
-        "answer": "<b>🤖 Ответ:</b> {answer}",
+        "question": "<b><emoji document_id=5974038293120027938>👤</emoji> Вопрос:</b> {question}\n",
+        "answer": "<b><emoji document_id=5188678912883827293>🤖</emoji> Ответ:</b> {answer}",
         "loading": "<code>Загрузка...</code>",
         "no_api_key": "<b>🚫 Не указан API ключ</b>\n"
-                      "<i>ℹ️ Получите его на официальном сайте OpenAI и добавьте в конфиг</i>"
+                      "<i><emoji document_id=5199682846729449178>ℹ️</emoji> Получите его на официальном сайте OpenAI и добавьте в конфиг</i>"
     }
 
     def __init__(self):
