@@ -209,7 +209,7 @@ class ChatGPT(loader.Module):
 
     def _process_code_tags(self, text: str) -> str:
         return re.sub(
-            r"`([^`]+)`",
+            r"`(.*?)`",
             r"<code>\1</code>",
             re.sub(r"```(.*?)```", r"<code>\1</code>", text, flags=re.DOTALL),
             flags=re.DOTALL,
