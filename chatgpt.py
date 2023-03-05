@@ -12,6 +12,7 @@ import asyncio
 import logging
 import contextlib
 import requests
+import re
 
 from telethon.tl.types import Message
 from telethon.tl.functions.channels import JoinChannelRequest as JCR
@@ -71,6 +72,9 @@ class ChatGPT(loader.Module):
         )
         return resp.json()
 
+    def _process_code_tags(self, text: str) -> str:
+        return re.sub(r"```(.*?)```", r"<code>\1</code>", text)
+
     async def _get_chat_completion(self, prompt: str) -> str:
         headers = {
             'Content-Type': 'application/json',
@@ -120,7 +124,7 @@ class ChatGPT(loader.Module):
             "\n".join(
                 [
                     self.strings("question").format(question=args),
-                    self.strings("answer").format(answer=answer),
+                    self.strings("answer").format(answer=self._process_code_tags(answer)),
                 ]
             ),
         )
