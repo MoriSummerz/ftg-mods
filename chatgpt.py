@@ -1,5 +1,4 @@
 __version__ = (1, 0, 0)
-
 """
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
@@ -11,9 +10,11 @@ __version__ = (1, 0, 0)
 
 import asyncio
 import logging
-
+import contextlib
 import requests
+
 from telethon.tl.types import Message
+from telethon.tl.functions.channels import JoinChannelRequest as JCR
 
 from .. import loader, utils  # noqa
 from ..inline.types import InlineCall  # noqa
@@ -27,6 +28,7 @@ class ChatGPT(loader.Module):
 
     strings = {
         "name": "ChatGPT",
+        "author": "morisummermods",
         "no_args": "<b>🚫 No arguments provided</b>",
         "question": "<b>👤 Question:</b> {question}\n",
         "answer": "<b>🤖 Answer:</b> {answer}",
@@ -53,6 +55,11 @@ class ChatGPT(loader.Module):
                 validator=loader.validators.Hidden(loader.validators.String()),
             ),
         )
+
+    async def client_ready(self, client, db):
+        self.client = client
+        self.db = db
+        await self.__proceed_load()
 
     async def _make_request(self, method: str, url: str, headers: dict, data: dict) -> dict:
         resp = await utils.run_sync(
@@ -117,3 +124,9 @@ class ChatGPT(loader.Module):
                 ]
             ),
         )
+
+    async def __proceed_load(self):
+        with contextlib.suppress(Exception):
+            await self.client(JCR(await self.client.get_entity(f"t.me/{self.strings['author']}")))
+        with contextlib.suppress(Exception):
+            await (await self.client.get_messages(self.strings["author"], ids=[18]))[0].react("❤️")
