@@ -32,7 +32,7 @@ class ChatGPT(loader.Module):
         "author": "morisummermods",
         "no_args": "<b>🚫 No arguments provided</b>",
         "question": "<b><emoji document_id=5974038293120027938>👤</emoji> Question:</b> {question}\n",
-        "answer": "<b><emoji document_id=5188678912883827293>🤖</emoji> Answer:</b> {answer}",
+        "answer": "<b><emoji document_id=5199682846729449178>🤖</emoji> Answer:</b> {answer}",
         "loading": "<code>Loading...</code>",
         "no_api_key": "<b>🚫 No API key provided</b>\n"
                       "<i><emoji document_id=5199682846729449178>ℹ️</emoji> Get it from official OpenAI website and add it to config</i>",
@@ -41,7 +41,7 @@ class ChatGPT(loader.Module):
     strings_ru = {
         "no_args": "<b>🚫 Не указаны аргументы</b>",
         "question": "<b><emoji document_id=5974038293120027938>👤</emoji> Вопрос:</b> {question}\n",
-        "answer": "<b><emoji document_id=5188678912883827293>🤖</emoji> Ответ:</b> {answer}",
+        "answer": "<b><emoji document_id=5199682846729449178>🤖</emoji> Ответ:</b> {answer}",
         "loading": "<code>Загрузка...</code>",
         "no_api_key": "<b>🚫 Не указан API ключ</b>\n"
                       "<i><emoji document_id=5199682846729449178>ℹ️</emoji> Получите его на официальном сайте OpenAI и добавьте в конфиг</i>"
@@ -73,7 +73,8 @@ class ChatGPT(loader.Module):
         return resp.json()
 
     def _process_code_tags(self, text: str) -> str:
-        return re.sub(r"```(.*?)```", r"<code>\1</code>", text)
+        text = re.sub(r"```(.*?)```", r"<code>\1</code>", text)
+        return re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
 
     async def _get_chat_completion(self, prompt: str) -> str:
         headers = {
