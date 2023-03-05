@@ -12,23 +12,25 @@ __version__ = (2, 6, 1)
 # meta pic: https://i.imgur.com/pViqDsI.png
 # meta banner: https://i.imgur.com/AIjsMoV.jpg
 
-from bs4 import BeautifulSoup
-import spotipy
-import requests
-from aiogram.types import (
-    InlineKeyboardMarkup,
-    InlineQueryResultArticle,
-    InlineKeyboardButton,
-    InputTextMessageContent,
-)
-from telethon.tl.types import Message
-from telethon.tl.functions.channels import JoinChannelRequest
-from ..inline import GeekInlineQuery, rand  # noqa
-from urllib.parse import quote_plus
-from .. import loader  # noqa
-from .. import utils  # noqa
 import logging
 import re
+from urllib.parse import quote_plus
+
+import requests
+import spotipy
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    InlineQueryResultArticle,
+    InputTextMessageContent,
+)
+from bs4 import BeautifulSoup
+from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.types import Message
+
+from .. import loader  # noqa
+from .. import utils  # noqa
+from ..inline import GeekInlineQuery, rand  # noqa
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +40,11 @@ api_headers = {
     "Host": "api.genius.com",
 }
 headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                  "AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/99.0.4844.82 Safari/537.36"
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/99.0.4844.82 Safari/537.36"
+    )
 }
 host = "https://api.genius.com"
 n = "\n"
@@ -61,18 +65,19 @@ def get_lyrics(self, song_url, remove_section_headers=False):
     if remove_section_headers:
         lyrics = re.sub(r"(\[.*?\])*", "", lyrics)
         lyrics = re.sub("\n{2}", "\n", lyrics)
-    if not lyrics:
-        return self.strings['noLyrics']
-    return lyrics
+
+    return lyrics or self.strings["noLyrics"]
 
 
 def search(q):
     """Search documents hosted on Genius"""
     req = requests.get(
-        f"https://api.genius.com/search"
-        f"?text_format=plain"
-        f"&q={quote_plus(q)}"
-        f"&access_token=uhYUr-qrBp5V3o46lA8vcaL1DKXTWVs5SDsb_0CDCIcKxKLwtapqeqkdNu8JnA6w",
+        (
+            "https://api.genius.com/search"
+            "?text_format=plain"
+            f"&q={quote_plus(q)}"
+            "&access_token=uhYUr-qrBp5V3o46lA8vcaL1DKXTWVs5SDsb_0CDCIcKxKLwtapqeqkdNu8JnA6w"
+        ),
         headers=api_headers,
     ).json()
 
@@ -92,6 +97,7 @@ def add_protocol(x):
     """Add https protocol to link"""
     return f"https:{x}" if x.startswith("//") else x
 
+
 @loader.tds
 class LyricsMod(loader.Module):
     """Song lyrics from Genius"""
@@ -100,8 +106,10 @@ class LyricsMod(loader.Module):
         "name": "Lyrics",
         "type_name": "<b>🚫 Please type name of the song</b>",
         "genius": "🎵 Full lyrics on Genius",
-        "noSpotify": "<b>🚫 Please install SpotifyNow module and proceed auth</b>\n"
-                     "🌃 Install: <code>.dlmod https://mods.hikariatama.ru/spotify.py</code>",
+        "noSpotify": (
+            "<b>🚫 Please install SpotifyNow module and proceed auth</b>\n"
+            "🌃 Install: <code>.dlmod https://mods.hikariatama.ru/spotify.py</code>"
+        ),
         "notFound": "🚫 No results found",
         "couldn'tFind": "We couldn't find what are you looking for",
         "sauth": "<b>🚫 Execute <code>.sauth</code> before using this action.</b>",
@@ -110,19 +118,22 @@ class LyricsMod(loader.Module):
         "noLyrics": "<b>🚫 Couldn't find the lyrics</b>",
         "lyrics": "Lyrics for <b>{}</b> by <b>{}</b>\n<i>{}",
         "loading": "Loading lyrics for <b>{}</b> by <b>{}</b>...\n{}",
-        "author": "morisummermods",
     }
 
     strings_ru = {
         "_cls_doc": "Поиск тексов песен с Genius",
         "_cmd_doc_lyrics": "Получить слова песни",
-        "_cmd_doc_slyrics": "Получить слова песни прослушиваемой в Спотифай, "
-                            "для работоспособности требуется модуль SpotifyNow",
+        "_cmd_doc_slyrics": (
+            "Получить слова песни прослушиваемой в Спотифай, "
+            "для работоспособности требуется модуль SpotifyNow"
+        ),
         "_ihandle_doc_lyrics": "Поиск текста песни",
         "type_name": "<b>🚫 Пожалуйста, введите имя композиции</b>",
         "genius": "🎵 Полный текст на Genius",
-        "noSpotify": "<b>🚫 Пожалуйста установи модуль SpotifyNow и пройди авторизацию.</b>\n"
-                     "🌃 Установка: <code>.dlmod https://mods.hikariatama.ru/spotify.py</code>",
+        "noSpotify": (
+            "<b>🚫 Пожалуйста установи модуль SpotifyNow и пройди авторизацию.</b>\n"
+            "🌃 Установка: <code>.dlmod https://mods.hikariatama.ru/spotify.py</code>"
+        ),
         "notFound": "🚫 Результаты не найдены",
         "couldn'tFind": "К сожалению мы не нашли, что вы искали",
         "sauth": "<b>🚫 Выполни <code>.sauth</code> перед этим действием.</b>",
@@ -130,23 +141,27 @@ class LyricsMod(loader.Module):
         "noResults": "<b>🚫 Результаты для <code>{}</code> не найдены</b>",
         "noLyrics": "<b>🚫 Не удалось найти текст</b>",
         "lyrics": "Текст песни <b>{}</b> от <b>{}</b>\n<i>{}",
-        "loading": "Загрузка текста песни <b>{}</b> от <b>{}</b>...\n{}"
+        "loading": "Загрузка текста песни <b>{}</b> от <b>{}</b>...\n{}",
     }
 
     async def client_ready(self, client, db) -> None:
+        if hasattr(self, "hikka"):
+            self.bot_id = self.inline.bot_id
+            return
+
         self.db = db
         self.client = client
         self.bot_id = (await self.inline.bot.get_me()).id
         try:
-            channel = await self.client.get_entity(f"t.me/{self.strings['author']}")
+            channel = await self.client.get_entity("t.me/morisummermods")
             await client(JoinChannelRequest(channel))
         except Exception:
-            logger.info(f"Can't join {self.strings['author']}")
+            logger.info("Can't join morisummermods")
         try:
-            post = (await client.get_messages(self.strings["author"], ids=[13]))[0]
+            post = (await client.get_messages("@morisummermods", ids=[13]))[0]
             await post.react("❤️")
         except Exception:
-            logger.info(f"Can't react to {self.strings['author']}")
+            logger.info("Can't react to morisummermods")
 
     async def lyricscmd(self, message: Message):
         """Get lyrics"""
@@ -155,15 +170,21 @@ class LyricsMod(loader.Module):
         if not text:
             if reply:
                 if (
-                        getattr(reply, "media", None)
-                        and getattr(reply.media, "document", None)
-                        and getattr(reply.media.document, "attributes", None)
+                    getattr(reply, "media", None)
+                    and getattr(reply.media, "document", None)
+                    and getattr(reply.media.document, "attributes", None)
                 ):
-                    text = reply.media.document.attributes[1].file_name.rsplit(".", 1)[0]
+                    text = reply.media.document.attributes[1].file_name.rsplit(".", 1)[
+                        0
+                    ]
                 else:
                     try:
-                        e = next(entity for entity in reply.entities if type(entity).__name__ == "MessageEntityCode")
-                        text = reply.raw_text[e.offset - 1: e.offset + e.length]
+                        e = next(
+                            entity
+                            for entity in reply.entities
+                            if type(entity).__name__ == "MessageEntityCode"
+                        )
+                        text = reply.raw_text[e.offset - 1 : e.offset + e.length]
                     except Exception:
                         text = reply.raw_text
             else:
@@ -177,7 +198,8 @@ class LyricsMod(loader.Module):
         await self.inline.form(
             self.strings["lyrics"].format(
                 track["title"], track["artists"], get_lyrics(self, track["url"])
-            )[:4092] + "</i>",
+            )[:4092]
+            + "</i>",
             reply_markup=[[{"text": self.strings["genius"], "url": track["url"]}]],
             force_me=False,
             message=message,
@@ -213,14 +235,17 @@ class LyricsMod(loader.Module):
                 description=track["artists"],
                 thumb_url=add_protocol(track["pic"]),
                 input_message_content=InputTextMessageContent(
-                    self.strings['loading'].format(track['title'], track['artists'], track['url']),
+                    self.strings["loading"].format(
+                        track["title"], track["artists"], track["url"]
+                    ),
                     parse_mode="HTML",
                     disable_web_page_preview=True,
                 ),
                 reply_markup=InlineKeyboardMarkup().add(
-                    InlineKeyboardButton(self.strings['genius'], url=track["url"])
+                    InlineKeyboardButton(self.strings["genius"], url=track["url"])
                 ),
-            ) for track in tracks[:50]
+            )
+            for track in tracks[:50]
         ]
         await query.answer(res, cache_time=0)
 
@@ -246,7 +271,9 @@ class LyricsMod(loader.Module):
         except Exception:
             track = None
         try:
-            artists = ", ".join([artist["name"] for artist in current_playback["item"]["artists"]])
+            artists = ", ".join(
+                [artist["name"] for artist in current_playback["item"]["artists"]]
+            )
         except Exception:
             artists = None
         text = f"{artists} {track}"
@@ -258,7 +285,8 @@ class LyricsMod(loader.Module):
         await self.inline.form(
             self.strings["lyrics"].format(
                 track["title"], track["artists"], get_lyrics(self, track["url"])
-            )[:4092] + "</i>",
+            )[:4092]
+            + "</i>",
             reply_markup=[[{"text": self.strings["genius"], "url": track["url"]}]],
             force_me=False,
             message=message,
@@ -266,24 +294,25 @@ class LyricsMod(loader.Module):
 
     async def watcher(self, message: Message) -> None:
         if (
-                getattr(message, "out", False)
-                and getattr(message, "via_bot_id", False)
-                and message.via_bot_id == self.bot_id
-                and (
+            getattr(message, "out", False)
+            and getattr(message, "via_bot_id", False)
+            and message.via_bot_id == self.bot_id
+            and (
                 "Loading lyrics for" in getattr(message, "raw_text", "")
                 or "Загрузка текста песни" in getattr(message, "raw_text", "")
-        )
+            )
         ):
             e = message.entities
             track = {
-                "title": message.raw_text[e[0].offset:e[0].offset + e[0].length],
-                "artists": message.raw_text[e[1].offset:e[1].offset + e[1].length],
-                "url": message.raw_text.splitlines()[1]
+                "title": message.raw_text[e[0].offset : e[0].offset + e[0].length],
+                "artists": message.raw_text[e[1].offset : e[1].offset + e[1].length],
+                "url": message.raw_text.splitlines()[1],
             }
             await self.inline.form(
                 self.strings["lyrics"].format(
                     track["title"], track["artists"], get_lyrics(self, track["url"])
-                )[:4092] + "</i>",
+                )[:4092]
+                + "</i>",
                 reply_markup=[[{"text": self.strings["genius"], "url": track["url"]}]],
                 force_me=False,
                 message=message,

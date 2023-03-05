@@ -12,15 +12,16 @@ __version__ = (1, 3, 0)
 # meta pic: https://i.imgur.com/fcHCrS2.png
 
 
-
-import requests
+import datetime
 import json
-import flag  # noqa
-
-from .. import loader, utils  # noqa
-from telethon.tl.types import *  # noqa
-from telethon.tl.functions.channels import JoinChannelRequest
 import logging
+
+import flag
+import requests
+from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.types import Message
+
+from .. import loader, utils
 
 logger = logging.getLogger(__name__)
 
@@ -29,23 +30,40 @@ logger = logging.getLogger(__name__)
 class OsuMod(loader.Module):
     """ "I'm an osu!bot that can do some things written by @morisummerzxc"""
 
-    strings = {"name": "Osu", "author": "morisummermods"}
+    strings = {
+        "name": "Osu",
+        "you_are": (
+            "<emoji document_id=5398001711786762757>✅</emoji> <b>You are"
+            " </b><code>{}</code><b> now</b>"
+        ),
+    }
+
+    strings_ru = {
+        "you_are": (
+            "<emoji document_id=5398001711786762757>✅</emoji> <b>Теперь ты"
+            " </b><code>{}</code><b></b>"
+        ),
+    }
 
     async def client_ready(self, client, db) -> None:
-        self.db = db
-        self.client = client
         self.url = "https://osu.ppy.sh/users/"
         self.nickname = self.db.get(self.strings["name"], "nickname", "")
+
+        if hasattr(self, "hikka"):
+            return
+
+        self.db = db
+        self.client = client
         try:
-            channel = await self.client.get_entity(f"t.me/{self.strings['author']}")
+            channel = await self.client.get_entity("t.me/morisummermods")
             await client(JoinChannelRequest(channel))
         except Exception:
-            logger.error(f"Can't join {self.strings['author']}")
+            logger.error("Can't join morisummermods")
         try:
-            post = (await client.get_messages(self.strings["author"], ids=[11]))[0]
+            post = (await client.get_messages("@morisummermods", ids=[11]))[0]
             await post.react("❤️")
         except Exception:
-            logger.error(f"Can't react to t.me/{self.strings['author']}")
+            logger.error("Can't react to t.me/morisummermods")
 
     @loader.unrestricted
     async def osumecmd(self, message: Message) -> None:
@@ -53,7 +71,10 @@ class OsuMod(loader.Module):
         nickname = utils.get_args_raw(message)
         self.db.set(self.strings["name"], "nickname", nickname)
         self.nickname = nickname
-        await utils.answer(message, "You are remembered as " + self.nickname)
+        await utils.answer(
+            message,
+            self.strings("you_are").format(utils.escape_html(self.nickname)),
+        )
 
     @loader.unrestricted
     async def osutopcmd(self, message: Message) -> None:
@@ -64,12 +85,15 @@ class OsuMod(loader.Module):
         if not nickname and not args:
             await utils.answer(
                 message,
-                "Remember your nickname with .osume <your nickname> or use .osutop <nickname>",
+                (
+                    "Remember your nickname with .osume <your nickname> or use .osutop"
+                    " <nickname>"
+                ),
             )
             return
         if args:
             nickname = args
-        req = requests.get("https://osu.ppy.sh/users/" + nickname).text
+        req = requests.get(f"https://osu.ppy.sh/users/{nickname}").text
         s = req.find('data-initial-data="') + 19
         JSON = req[s : req.find('"', s + 1)].replace("&quot;", '"')
         info = json.loads(JSON)
@@ -105,9 +129,9 @@ class OsuMod(loader.Module):
                 grade = top["rank"][:-1] + "+"
             else:
                 grade = top["rank"]
-            out += grade + " " + str(round(float(top["accuracy"]) * 100, 2)) + "% "
+            out += f"{grade} " + str(round(float(top["accuracy"]) * 100, 2)) + "% "
             for mod in top["mods"]:
-                out += mod + " "
+                out += f"{mod} "
             out += str(top["beatmap"]["difficulty_rating"]) + "★"
             if top["perfect"]:
                 out += "FC"
@@ -130,13 +154,16 @@ class OsuMod(loader.Module):
         if not nickname and not args:
             await utils.answer(
                 message,
-                "Remember your nickname with .osume <your nickname> or use .osutop <nickname>",
+                (
+                    "Remember your nickname with .osume <your nickname> or use .osutop"
+                    " <nickname>"
+                ),
             )
             return
         if args:
             nickname = args
         await message.delete()
-        req = requests.get("https://osu.ppy.sh/users/" + nickname).text
+        req = requests.get(f"https://osu.ppy.sh/users/{nickname}").text
         s = req.find('data-initial-data="') + 19
         JSON = req[s : req.find('"', s + 1)].replace("&quot;", '"')
         info = json.loads(JSON)
@@ -179,9 +206,9 @@ class OsuMod(loader.Module):
             grade = top["rank"][:-1] + "+"
         else:
             grade = top["rank"]
-        topScore += grade + " " + str(round(float(top["accuracy"]) * 100, 2)) + "% "
+        topScore += f"{grade} " + str(round(float(top["accuracy"]) * 100, 2)) + "% "
         for mod in top["mods"]:
-            topScore += mod + " "
+            topScore += f"{mod} "
         topScore += str(top["beatmap"]["difficulty_rating"]) + "★"
         if top["perfect"]:
             topScore += "FC"
@@ -221,6 +248,3 @@ class OsuMod(loader.Module):
             )
         )
         await self.client.send_file(message.peer_id, photo, caption=out)
-
-    async def on_unload(self) -> None:
-        pass
