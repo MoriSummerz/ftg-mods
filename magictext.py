@@ -11,12 +11,14 @@ __version__ = (2, 0, 0)
 # meta banner: https://i.imgur.com/3joMFwC.jpg
 # meta pic: https://i.imgur.com/nmAXM3k.png
 
-from .. import loader, utils  # noqa
-from telethon.tl.types import Message
-from telethon.tl.functions.channels import JoinChannelRequest
 import logging
 from asyncio import sleep
+
 from aiogram.types import CallbackQuery
+from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.types import Message
+
+from .. import loader, utils  # noqa
 
 logger = logging.getLogger(__name__)
 letters = {
@@ -92,58 +94,79 @@ class MagicTextMod(loader.Module):
     strings = {
         "name": "MagicText",
         "inline_text": "❤️‍🔥 I want to tell you something...",
-        "author": "morisummermods"
+        "only_2": "<b>🚫 Please type only 2 symbols</b>",
+        "symbols_success": "<b>✅ Symbols set successfully</b>",
+        "text_success": "<b>✅ Text set successfully</b>",
+        "no_text": "<b>🚫 Please type text</b>",
+        "open": "💖 Open",
+        "not_supported": "<b>🚫 Not supported symbol</b>",
+    }
+
+    strings_ru = {
+        "inline_text": "❤️‍🔥 Я хочу тебе сказать что-то...",
+        "only_2": "<b>🚫 Пожалуйста, введите только 2 символа</b>",
+        "symbols_success": "<b>✅ Символы установлены успешно</b>",
+        "text_success": "<b>✅ Текст успешно установлен</b>",
+        "no_text": "<b>🚫 Пожалуйста, введите текст</b>",
+        "open": "💖 Открыть",
+        "not_supported": "<b>🚫 Неподдерживаемый символ</b>",
     }
 
     async def client_ready(self, client, db) -> None:
-        self.db = db
-        self.client = client
         self.symbols = self.db.get(self.strings["name"], "symbols", "✨💖")
         self.inline_text = self.db.get(
-            self.strings["name"], "inline_text", self.strings["inline_text"]
+            self.strings["name"],
+            "inline_text",
+            self.strings["inline_text"],
         )
+
+        if hasattr(self, "hikka"):
+            return
+
+        self.db = db
+        self.client = client
         try:
-            channel = await self.client.get_entity(f"t.me/{self.strings['author']}")
+            channel = await self.client.get_entity("t.me/morisummermods")
             await client(JoinChannelRequest(channel))
         except Exception:
-            logger.error(f"Can't join {self.strings['author']}")
+            logger.error("Can't join morisummermods")
         try:
-            post = (await client.get_messages(self.strings['author'], ids=[9]))[0]
-            await post.react('❤️')
+            post = (await client.get_messages("@morisummermods", ids=[9]))[0]
+            await post.react("❤️")
         except Exception:
-            logger.error(f"Can't react to t.me/{self.strings['author']}")
+            logger.error("Can't react to t.me/morisummermods")
 
     async def mtsetcmd(self, message: Message):
         """Set the symbols for animation (Separated by space. Example: .mtset ✨ 💖)"""
         text = utils.get_args_raw(message).split()
 
         if len(text) != 2:
-            await message.edit("<b>🚫 Please type only 2 symbols</b>")
+            await utils.answer(message, self.strings("only_2"))
             return
 
         self.db.set(self.strings["name"], "symbols", text)
         self.symbols = text
 
-        await message.edit("<b>✅ Symbols set successfully</b>")
+        await utils.answer(message, self.strings("symbols_success"))
 
     async def mtisetcmd(self, message: Message):
         """Set the text for inline message (Example: .mtiset ❤️‍🔥 I want to tell you something...)"""
         text = utils.get_args_raw(message)
 
         if not text:
-            await message.edit("<b>🚫 Please type text</b>")
+            await utils.answer(message, self.strings("no_text"))
             return
 
         self.db.set(self.strings["name"], "inline_text", text)
         self.inline_text = text
 
-        await message.edit("<b>✅ Text set successfully</b>")
+        await utils.answer(message, self.strings("text_success"))
 
     async def mtcmd(self, message: Message):
         """Send message with animating text"""
         text = utils.get_args_raw(message)
         text = text.replace("<3", "💖")
-        await message.edit(letters[" "].replace("0", self.symbols[0]))
+        await utils.answer(message, letters[" "].replace("0", self.symbols[0]))
         _last = ""
         for letter in text:
             if _last and _last == letter:
@@ -154,18 +177,20 @@ class MagicTextMod(loader.Module):
                 await sleep(0.7)
                 continue
 
-            await message.edit(
-                letters.get(letter.lower(), "<b>🚫 Not supported symbol</b>")
-                    .replace("0", self.symbols[0])
-                    .replace("1", self.symbols[1])
+            await utils.answer(
+                message,
+                letters.get(letter.lower(), self.strings("not_supported"))
+                .replace("0", self.symbols[0])
+                .replace("1", self.symbols[1]),
             )
 
             _last = letter
             await sleep(0.7)
         text = text.replace("💖", "<3")
 
-        await message.edit(
-            f"{self.symbols[0]}{self.symbols[1]}<b>{text}</b>{self.symbols[1]}{self.symbols[0]}"
+        await utils.answer(
+            message,
+            f"{self.symbols[0]}{self.symbols[1]}<b>{text}</b>{self.symbols[1]}{self.symbols[0]}",
         )
 
     async def mticmd(self, message: Message) -> None:
@@ -177,7 +202,7 @@ class MagicTextMod(loader.Module):
             reply_markup=[
                 [
                     {
-                        "text": "💖 Open",
+                        "text": self.strings("open"),
                         "callback": self.inline__handler,
                         "args": (text,),
                     }
@@ -204,9 +229,9 @@ class MagicTextMod(loader.Module):
                 continue
 
             await call.edit(
-                letters.get(letter.lower(), "<b>🚫 Not supported symbol</b>")
-                    .replace("0", self.symbols[0])
-                    .replace("1", self.symbols[1])
+                letters.get(letter.lower(), self.strings("not_supported"))
+                .replace("0", self.symbols[0])
+                .replace("1", self.symbols[1])
             )
 
             _last = letter
