@@ -5,3 +5,4 @@ top20
 lyrics
 picsaver
 weather
+chatgpt
