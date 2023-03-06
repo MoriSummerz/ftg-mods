@@ -7,9 +7,12 @@ __version__ = (1, 2, 0)
     Licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 """
 # meta developer: @morisummermods
-from .. import loader, utils  # noqa
-from telethon.tl.types import *  # noqa
+
 import logging
+
+from telethon.tl.types import Message
+
+from .. import loader
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +22,9 @@ class Top20Mod(loader.Module):
     strings = {"name": "Top20"}
 
     async def client_ready(self, client, db) -> None:
+        if hasattr(self, "hikka"):
+            return
+
         self.db = db
         self.client = client
 
@@ -29,7 +35,7 @@ class Top20Mod(loader.Module):
         async for msg in self.client.iter_messages(message.peer_id):
             total += 1
             if total % 500 == 0:
-                await message.edit("Processed {} messages".format(total))
+                await message.edit(f"Processed {total} messages")
             if msg.text:
                 for word in msg.text.split():
                     if len(word) >= 3:
@@ -40,7 +46,6 @@ class Top20Mod(loader.Module):
         global freq
         freq = sorted(words, key=words.get, reverse=True)
         out = "".join(
-            "Top {}. {} occurrences: {}\n".format(i + 1, words[freq[i]], freq[i])
-            for i in range(20)
+            f"Top {i + 1}. {words[freq[i]]} occurrences: {freq[i]}\n" for i in range(20)
         )
         await message.edit(out, parse_mode=None)

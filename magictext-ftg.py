@@ -6,13 +6,15 @@ __version__ = (0, 0, 1)
     Copyright 2022 t.me/morisummermods
     Licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 """
+import logging
+from asyncio import sleep
+
+from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.types import Message
+
 # scope: inline_content
 # meta developer: @morisummermods
 from .. import loader, utils  # noqa
-from telethon.tl.types import Message
-from telethon.tl.functions.channels import JoinChannelRequest
-import logging
-from asyncio import sleep
 
 logger = logging.getLogger(__name__)
 letters = {
@@ -85,22 +87,23 @@ letters = {
 class MagicTextMod(loader.Module):
     """Magic Text generator"""
 
-    strings = {
-        "name": "MagicText",
-        "author": "morisummermods"
-    }
+    strings = {"name": "MagicText", "author": "morisummermods"}
 
     async def client_ready(self, client, db) -> None:
         self.db = db
         self.client = client
         self.symbols = self.db.get(self.strings["name"], "symbols", "✨💖")
         try:
-            await client(JoinChannelRequest(await self.client.get_entity(f"t.me/{self.strings['author']}")))
+            await client(
+                JoinChannelRequest(
+                    await self.client.get_entity(f"t.me/{self.strings['author']}")
+                )
+            )
         except Exception:
             logger.error(f"Can't join {self.strings['author']}")
         try:
-            post = (await client.get_messages(self.strings['author'], ids=[9]))[0]
-            await post.react('❤️')
+            post = (await client.get_messages(self.strings["author"], ids=[9]))[0]
+            await post.react("❤️")
         except Exception:
             logger.error(f"Can't react to t.me/{self.strings['author']}")
 
@@ -134,8 +137,8 @@ class MagicTextMod(loader.Module):
 
             await message.edit(
                 letters.get(letter.lower(), "<b>🚫 Not supported symbol</b>")
-                    .replace("0", self.symbols[0])
-                    .replace("1", self.symbols[1])
+                .replace("0", self.symbols[0])
+                .replace("1", self.symbols[1])
             )
 
             _last = letter
