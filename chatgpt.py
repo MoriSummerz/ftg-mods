@@ -6,14 +6,13 @@ __version__ = (1, 0, 0)
     Licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
 """
 # meta developer: @morisummermods
-# meta banner:
+# meta banner: https://i.imgur.com/H1vPM6U.jpg
 
+from telethon.tl.types import Message
+import requests
 import re
 
-import requests
-from telethon.tl.types import Message
-
-from .. import loader, utils
+from .. import loader, utils # noqa
 
 
 @loader.tds
