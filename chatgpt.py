@@ -1,4 +1,7 @@
 __version__ = (1, 0, 0)
+
+import contextlib
+
 """
     █▀▄▀█ █▀█ █▀█ █ █▀ █ █ █▀▄▀█ █▀▄▀█ █▀▀ █▀█
     █ ▀ █ █▄█ █▀▄ █ ▄█ █▄█ █ ▀ █ █ ▀ █ ██▄ █▀▄
@@ -10,9 +13,12 @@ __version__ = (1, 0, 0)
 
 from telethon.tl.types import Message
 import requests
+import logging
 import re
 
-from .. import loader, utils # noqa
+from .. import loader, utils  # noqa
+
+logger = logging.getLogger(__name__)
 
 
 @loader.tds
@@ -191,11 +197,11 @@ class ChatGPT(loader.Module):
         )
 
     async def _make_request(
-        self,
-        method: str,
-        url: str,
-        headers: dict,
-        data: dict,
+            self,
+            method: str,
+            url: str,
+            headers: dict,
+            data: dict,
     ) -> dict:
         resp = await utils.run_sync(
             requests.request,
@@ -227,6 +233,8 @@ class ChatGPT(loader.Module):
                 "messages": [{"role": "user", "content": prompt}],
             },
         )
+        if resp.get("error", None):
+            return f"🚫 {resp['error']['message']}"
         return resp["choices"][0]["message"]["content"]
 
     @loader.command(
